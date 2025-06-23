@@ -5,6 +5,7 @@ import './LoginPage.css';
 import { db } from '../../assets/firebase-config';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import PixelAlert from '../PixelAlert/PixelAlert';
+import bcrypt from 'bcryptjs';
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -96,9 +97,10 @@ const LoginPage = () => {
         setLoading(true);
         try {
           const collectionName = formData.role === 'Admin' ? 'admins' : 'teachers';
+          const hashedPassword = await bcrypt.hash(formData.password, 10);
           await addDoc(collection(db, collectionName), {
             email: formData.email,
-            password: formData.password, // In production, hash the password!
+            password: hashedPassword,
             first_name: formData.first_name,
             last_name: formData.last_name,
             contact_number: formData.contact_number,
@@ -147,14 +149,22 @@ const LoginPage = () => {
 
   return (
     <div className="login-container">
-      {alert.open && (
-        <PixelAlert
-          message={alert.message}
-          type={alert.type}
-          onClose={() => setAlert({ open: false, message: '', type: 'success' })}
-        />
-      )}
-      <h1 className="title">Student Management</h1>
+      <div className="background-geometry">
+        <div className="shape circle1"></div>
+        <div className="shape circle2"></div>
+        <div className="shape circle3"></div>
+        <div className="shape square1"></div>
+        <div className="shape square2"></div>
+        <div className="shape triangle1"></div>
+        <div className="shape triangle2"></div>
+        <div className="shape circle4"></div>
+        <div className="shape circle5"></div>
+        <div className="shape square3"></div>
+        <div className="shape square4"></div>
+        <div className="shape triangle3"></div>
+        <div className="shape triangle4"></div>
+      </div>
+      <h1 className="title" data-text="Student Management">Student Management</h1>
       <div className="login-card">
         <div className="login-header">
           <div className="window-controls">
@@ -181,7 +191,7 @@ const LoginPage = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="Enter your email"
+                    placeholder="Email"
                   />
                 </div>
                 {errors.email && <span className="error-message">{errors.email}</span>}
@@ -199,7 +209,7 @@ const LoginPage = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="Enter your password"
+                    placeholder="Password"
                   />
                   <span className="password-icon" onClick={togglePasswordVisibility}>
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -223,7 +233,7 @@ const LoginPage = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="Enter your email"
+                      placeholder="Email"
                     />
                   </div>
                   {errors.email && <span className="error-message">{errors.email}</span>}
@@ -240,7 +250,7 @@ const LoginPage = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder="Enter your password"
+                      placeholder="Password"
                     />
                     <span className="password-icon" onClick={togglePasswordVisibility}>
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -263,7 +273,7 @@ const LoginPage = () => {
                       name="first_name"
                       value={formData.first_name}
                       onChange={handleChange}
-                      placeholder="Enter your first name"
+                      placeholder="First Name"
                     />
                   </div>
                   {errors.first_name && <span className="error-message">{errors.first_name}</span>}
@@ -280,7 +290,7 @@ const LoginPage = () => {
                       name="last_name"
                       value={formData.last_name}
                       onChange={handleChange}
-                      placeholder="Enter your last name"
+                      placeholder="Last Name"
                     />
                   </div>
                   {errors.last_name && <span className="error-message">{errors.last_name}</span>}
@@ -295,12 +305,14 @@ const LoginPage = () => {
                       <FaPhone />
                     </span>
                     <input
-                      type="text"
+                      type="tel"
                       id="contact_number"
                       name="contact_number"
                       value={formData.contact_number}
                       onChange={handleChange}
-                      placeholder="Enter your contact number"
+                      placeholder="Contact Number"
+                      pattern="[0-9]*"
+                      inputMode="numeric"
                     />
                   </div>
                   {errors.contact_number && <span className="error-message">{errors.contact_number}</span>}
@@ -330,6 +342,13 @@ const LoginPage = () => {
               ? (isLogin ? 'Signing In...' : 'Registering...')
               : isLogin ? 'Sign In' : 'Register'}
           </button>
+          {alert.open && (
+            <PixelAlert
+              message={alert.message}
+              type={alert.type}
+              onClose={() => setAlert({ open: false, message: '', type: 'success' })}
+            />
+          )}
         </form>
         
         <div className="login-footer">
