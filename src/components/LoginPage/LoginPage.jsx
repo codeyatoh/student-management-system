@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash, FaUser, FaLock, FaEnvelope, FaPhone } from 'react-ic
 import './LoginPage.css';
 import { db } from '../../assets/firebase-config';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import PixelAlert from '../PixelAlert/PixelAlert';
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,6 +19,7 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ open: false, message: '', type: 'success' });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -62,9 +64,14 @@ const LoginPage = () => {
         }
         setLoading(false);
         if (found) {
-          alert('Login successful! (' + userRole + ')');
-          navigate('/dashboard');
+          setAlert({ open: true, message: `Login successful! (${userRole})`, type: 'success' });
+          setTimeout(() => {
+            setAlert({ open: false, message: '', type: 'success' });
+            navigate('/dashboard');
+          }, 1200);
         } else {
+          setAlert({ open: true, message: 'Invalid email or password', type: 'error' });
+          setTimeout(() => setAlert({ open: false, message: '', type: 'success' }), 1800);
           setErrors({
             email: 'Invalid email or password',
             password: 'Invalid email or password',
@@ -98,11 +105,15 @@ const LoginPage = () => {
             role: formData.role,
           });
           setLoading(false);
-          alert('Registration successful!');
-          setIsLogin(true); // Switch to login view
+          setAlert({ open: true, message: 'Registration successful!', type: 'success' });
+          setTimeout(() => {
+            setAlert({ open: false, message: '', type: 'success' });
+            setIsLogin(true); // Switch to login view
+          }, 1200);
         } catch (error) {
           setLoading(false);
-          alert('Registration failed: ' + error.message);
+          setAlert({ open: true, message: 'Registration failed: ' + error.message, type: 'error' });
+          setTimeout(() => setAlert({ open: false, message: '', type: 'success' }), 1800);
         }
       } else {
         setErrors({
@@ -136,6 +147,13 @@ const LoginPage = () => {
 
   return (
     <div className="login-container">
+      {alert.open && (
+        <PixelAlert
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert({ open: false, message: '', type: 'success' })}
+        />
+      )}
       <h1 className="title">Student Management</h1>
       <div className="login-card">
         <div className="login-header">
@@ -308,7 +326,9 @@ const LoginPage = () => {
           )}
 
           <button type="submit" className="login-button" disabled={loading}>
-            {loading ? 'Registering...' : isLogin ? 'Sign In' : 'Register'}
+            {loading
+              ? (isLogin ? 'Signing In...' : 'Registering...')
+              : isLogin ? 'Sign In' : 'Register'}
           </button>
         </form>
         
