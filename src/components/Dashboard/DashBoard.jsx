@@ -80,6 +80,10 @@ const Dashboard = () => {
             </Link>
           </li>
         </ul>
+        {/* Move Log Out button to the bottom of the sidebar */}
+        <div className="sidebar-logout">
+          <Link to="/" className="logout-btn">Log Out</Link>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -87,9 +91,6 @@ const Dashboard = () => {
         {/* Header */}
         <div className="header">
           <h2>Student Management System</h2>
-          <div className="user-info">
-            <Link to="/" className="logout-btn">Log Out</Link>
-          </div>
         </div>
 
         {/* Stats Cards */}
