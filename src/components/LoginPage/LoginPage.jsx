@@ -34,7 +34,6 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isLogin) {
-      // Login logic (using email and password)
       if (formData.email && formData.password) {
         setLoading(true);
         let found = false;
@@ -42,34 +41,37 @@ const LoginPage = () => {
         // Check admins
         const adminQuery = query(
           collection(db, 'admins'),
-          where('email', '==', formData.email),
-          where('password', '==', formData.password)
+          where('email', '==', formData.email)
         );
         const adminSnapshot = await getDocs(adminQuery);
         if (!adminSnapshot.empty) {
-          found = true;
-          userRole = 'Admin';
+          const adminData = adminSnapshot.docs[0].data();
+          const isPasswordCorrect = await bcrypt.compare(formData.password, adminData.password);
+          if (isPasswordCorrect) {
+            found = true;
+            userRole = 'Admin';
+          }
         }
         // Check teachers if not found in admins
         if (!found) {
           const teacherQuery = query(
             collection(db, 'teachers'),
-            where('email', '==', formData.email),
-            where('password', '==', formData.password)
+            where('email', '==', formData.email)
           );
           const teacherSnapshot = await getDocs(teacherQuery);
           if (!teacherSnapshot.empty) {
-            found = true;
-            userRole = 'Teacher';
+            const teacherData = teacherSnapshot.docs[0].data();
+            const isPasswordCorrect = await bcrypt.compare(formData.password, teacherData.password);
+            if (isPasswordCorrect) {
+              found = true;
+              userRole = 'Teacher';
+            }
           }
         }
         setLoading(false);
         if (found) {
           setAlert({ open: true, message: `Login successful! (${userRole})`, type: 'success' });
-          setTimeout(() => {
-            setAlert({ open: false, message: '', type: 'success' });
-            navigate('/dashboard');
-          }, 1200);
+          navigate('/dashboard');
         } else {
           setAlert({ open: true, message: 'Invalid email or password', type: 'error' });
           setTimeout(() => setAlert({ open: false, message: '', type: 'success' }), 1800);

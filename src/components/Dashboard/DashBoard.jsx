@@ -2,21 +2,19 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   FaTachometerAlt, FaUser, FaChalkboardTeacher, FaUserShield, FaChalkboard, 
-  FaSchool, FaArrowLeft, FaArrowRight 
+  FaSchool, FaChevronLeft, FaSignOutAlt 
 } from 'react-icons/fa';
 import './Dashboard.css';
-import nightbyteLogo from './assets/nightbyte.png';
+import nightbyteLogo from '../../assets/nightbyte.png';
 
 const Dashboard = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const location = useLocation();
 
-  // Debugging: Log the current pathname and active status
-  console.log('Current Pathname:', location.pathname);
-  console.log('Is Dashboard link active?', location.pathname === '/dashboard');
+  // TODO: Fetch dynamic stats from Firestore here using useEffect
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
   const stats = [
@@ -27,63 +25,48 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className={`dashboard-layout ${!isSidebarOpen ? 'sidebar-closed' : ''}`}>
+    <div className="dashboard-layout">
       {/* Sidebar */}
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <div className="sidebar-logo-container">
-            <button onClick={toggleSidebar} className="sidebar-toggle">
-              {isSidebarOpen ? <FaArrowLeft /> : <FaArrowRight />}
-            </button>
+      <div className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`} id="sidebar">
+        <div className="logo-container">
+          <div className="logo">
+            <img src={nightbyteLogo} alt="NightByte Logo" />
           </div>
         </div>
-        <div className="sidebar-profile">
-          <img src={nightbyteLogo} alt="Profile" className="profile-pic" />
-          {isSidebarOpen && (
-            <div className="profile-info">
-              <div className="profile-name">bunsai</div>
-              <div className="profile-role">admin</div>
-            </div>
-          )}
+
+        <div className="toggle-btn" id="toggle-btn" onClick={toggleSidebar} aria-label="Toggle Sidebar">
+          <FaChevronLeft />
         </div>
-        <ul className="sidebar-menu">
-          <li>
-            <Link to="/dashboard" className={`sidebar-link ${location.pathname === '/dashboard' ? 'active' : ''}`}>
-              <span className="sidebar-icon" data-tooltip="Dashboard"><FaTachometerAlt /></span>
-              {isSidebarOpen && <span className="sidebar-text">Dashboard</span>}
-            </Link>
-            {/* Debugging: Log the applied class for Dashboard link */}
-            {console.log('Dashboard Link Class:', `sidebar-link ${location.pathname === '/dashboard' ? 'active' : ''}`)}
-          </li>
-          <li>
-            <Link to="/add-student" className={`sidebar-link ${location.pathname === '/add-student' ? 'active' : ''}`}>
-              <span className="sidebar-icon" data-tooltip="Students"><FaUser /></span>
-              {isSidebarOpen && <span className="sidebar-text">Students</span>}
-            </Link>
-          </li>
-          <li>
-            <Link to="/add-teacher" className={`sidebar-link ${location.pathname === '/add-teacher' ? 'active' : ''}`}>
-              <span className="sidebar-icon" data-tooltip="Teachers"><FaChalkboardTeacher /></span>
-              {isSidebarOpen && <span className="sidebar-text">Teachers</span>}
-            </Link>
-          </li>
-          <li>
-            <Link to="/add-classroom" className={`sidebar-link ${location.pathname === '/add-classroom' ? 'active' : ''}`}>
-              <span className="sidebar-icon" data-tooltip="Classrooms"><FaChalkboard /></span>
-              {isSidebarOpen && <span className="sidebar-text">Classrooms</span>}
-            </Link>
-          </li>
-          <li>
-            <Link to="/add-class" className={`sidebar-link ${location.pathname === '/add-class' ? 'active' : ''}`}>
-              <span className="sidebar-icon" data-tooltip="Add Class"><FaSchool /></span>
-              {isSidebarOpen && <span className="sidebar-text">Add Class</span>}
-            </Link>
-          </li>
-        </ul>
-        {/* Move Log Out button to the bottom of the sidebar */}
-        <div className="sidebar-logout">
-          <Link to="/" className="logout-btn">Log Out</Link>
-        </div>
+
+        <Link to="/dashboard" className={`menu-item ${location.pathname === '/dashboard' ? 'active' : ''}`}> 
+          <FaTachometerAlt />
+          <span>Dashboard</span>
+        </Link>
+
+        <Link to="/add-student" className={`menu-item ${location.pathname === '/add-student' ? 'active' : ''}`}> 
+          <FaUser />
+          <span>Students</span>
+        </Link>
+
+        <Link to="/add-teacher" className={`menu-item ${location.pathname === '/add-teacher' ? 'active' : ''}`}> 
+          <FaChalkboardTeacher />
+          <span>Teachers</span>
+        </Link>
+
+        <Link to="/add-classroom" className={`menu-item ${location.pathname === '/add-classroom' ? 'active' : ''}`}> 
+          <FaChalkboard />
+          <span>Classrooms</span>
+        </Link>
+
+        <Link to="/add-class" className={`menu-item ${location.pathname === '/add-class' ? 'active' : ''}`}> 
+          <FaSchool />
+          <span>Add Class</span>
+        </Link>
+
+        <Link to="/" className="menu-item"> 
+          <FaSignOutAlt />
+          <span>Logout</span>
+        </Link>
       </div>
 
       {/* Main Content */}
