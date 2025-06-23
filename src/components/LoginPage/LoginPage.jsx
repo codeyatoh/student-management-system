@@ -1,17 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaEye, FaEyeSlash, FaUser, FaLock } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaUser, FaLock, FaEnvelope, FaPhone } from 'react-icons/fa';
 import './LoginPage.css';
+import { db } from '../../assets/firebase-config';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
-    confirmPassword: ''
+    first_name: '',
+    last_name: '',
+    contact_number: '',
+    role: 'Teacher',
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,28 +28,90 @@ const LoginPage = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (isLogin) {
-      // Login logic
-      if (formData.username && formData.password) {
-        navigate('/dashboard');
+      // Login logic (using email and password)
+      if (formData.email && formData.password) {
+        setLoading(true);
+        let found = false;
+        let userRole = '';
+        // Check admins
+        const adminQuery = query(
+          collection(db, 'admins'),
+          where('email', '==', formData.email),
+          where('password', '==', formData.password)
+        );
+        const adminSnapshot = await getDocs(adminQuery);
+        if (!adminSnapshot.empty) {
+          found = true;
+          userRole = 'Admin';
+        }
+        // Check teachers if not found in admins
+        if (!found) {
+          const teacherQuery = query(
+            collection(db, 'teachers'),
+            where('email', '==', formData.email),
+            where('password', '==', formData.password)
+          );
+          const teacherSnapshot = await getDocs(teacherQuery);
+          if (!teacherSnapshot.empty) {
+            found = true;
+            userRole = 'Teacher';
+          }
+        }
+        setLoading(false);
+        if (found) {
+          alert('Login successful! (' + userRole + ')');
+          navigate('/dashboard');
+        } else {
+          setErrors({
+            email: 'Invalid email or password',
+            password: 'Invalid email or password',
+          });
+        }
       } else {
         setErrors({
-          username: !formData.username ? 'Username is required' : '',
+          email: !formData.email ? 'Email is required' : '',
           password: !formData.password ? 'Password is required' : ''
         });
       }
     } else {
       // Register logic
-      if (formData.username && formData.password && formData.password === formData.confirmPassword) {
-        alert('Registration successful!');
-        setIsLogin(true); // Switch to login view
+      if (
+        formData.email &&
+        formData.password &&
+        formData.first_name &&
+        formData.last_name &&
+        formData.contact_number &&
+        formData.role
+      ) {
+        setLoading(true);
+        try {
+          const collectionName = formData.role === 'Admin' ? 'admins' : 'teachers';
+          await addDoc(collection(db, collectionName), {
+            email: formData.email,
+            password: formData.password, // In production, hash the password!
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            contact_number: formData.contact_number,
+            role: formData.role,
+          });
+          setLoading(false);
+          alert('Registration successful!');
+          setIsLogin(true); // Switch to login view
+        } catch (error) {
+          setLoading(false);
+          alert('Registration failed: ' + error.message);
+        }
       } else {
         setErrors({
-          username: !formData.username ? 'Username is required' : '',
+          email: !formData.email ? 'Email is required' : '',
           password: !formData.password ? 'Password is required' : '',
-          confirmPassword: formData.password !== formData.confirmPassword ? 'Passwords do not match' : ''
+          first_name: !formData.first_name ? 'First name is required' : '',
+          last_name: !formData.last_name ? 'Last name is required' : '',
+          contact_number: !formData.contact_number ? 'Contact number is required' : '',
+          role: !formData.role ? 'Role is required' : '',
         });
       }
     }
@@ -56,7 +124,14 @@ const LoginPage = () => {
   const toggleForm = () => {
     setIsLogin(!isLogin);
     setErrors({});
-    setFormData({ username: '', password: '', confirmPassword: '' });
+    setFormData({
+      email: '',
+      password: '',
+      first_name: '',
+      last_name: '',
+      contact_number: '',
+      role: 'Teacher',
+    });
   };
 
   return (
@@ -74,67 +149,166 @@ const LoginPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <div className="input-wrapper">
-              <span className="input-icon">
-                <FaUser />
-              </span>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="Enter your username"
-              />
-            </div>
-            {errors.username && <span className="error-message">{errors.username}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <div className="input-wrapper">
-              <span className="input-icon">
-                <FaLock />
-              </span>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter your password"
-              />
-              <span className="password-icon" onClick={togglePasswordVisibility}>
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
-            </div>
-            {errors.password && <span className="error-message">{errors.password}</span>}
-          </div>
-
-          {!isLogin && (
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm Password</label>
-              <div className="input-wrapper">
-                <span className="input-icon">
-                  <FaLock />
-                </span>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm your password"
-                />
+          {isLogin ? (
+            <>
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <div className="input-wrapper">
+                  <span className="input-icon">
+                    <FaEnvelope />
+                  </span>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                  />
+                </div>
+                {errors.email && <span className="error-message">{errors.email}</span>}
               </div>
-              {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-            </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <div className="input-wrapper">
+                  <span className="input-icon">
+                    <FaLock />
+                  </span>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter your password"
+                  />
+                  <span className="password-icon" onClick={togglePasswordVisibility}>
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
+                {errors.password && <span className="error-message">{errors.password}</span>}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="email">Email</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">
+                      <FaEnvelope />
+                    </span>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                  {errors.email && <span className="error-message">{errors.email}</span>}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="password">Password</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">
+                      <FaLock />
+                    </span>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Enter your password"
+                    />
+                    <span className="password-icon" onClick={togglePasswordVisibility}>
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
+                  {errors.password && <span className="error-message">{errors.password}</span>}
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="first_name">First Name</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">
+                      <FaUser />
+                    </span>
+                    <input
+                      type="text"
+                      id="first_name"
+                      name="first_name"
+                      value={formData.first_name}
+                      onChange={handleChange}
+                      placeholder="Enter your first name"
+                    />
+                  </div>
+                  {errors.first_name && <span className="error-message">{errors.first_name}</span>}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="last_name">Last Name</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">
+                      <FaUser />
+                    </span>
+                    <input
+                      type="text"
+                      id="last_name"
+                      name="last_name"
+                      value={formData.last_name}
+                      onChange={handleChange}
+                      placeholder="Enter your last name"
+                    />
+                  </div>
+                  {errors.last_name && <span className="error-message">{errors.last_name}</span>}
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="contact_number">Contact Number</label>
+                  <div className="input-wrapper">
+                    <span className="input-icon">
+                      <FaPhone />
+                    </span>
+                    <input
+                      type="text"
+                      id="contact_number"
+                      name="contact_number"
+                      value={formData.contact_number}
+                      onChange={handleChange}
+                      placeholder="Enter your contact number"
+                    />
+                  </div>
+                  {errors.contact_number && <span className="error-message">{errors.contact_number}</span>}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="role">Role</label>
+                  <div className="input-wrapper">
+                    <select
+                      id="role"
+                      name="role"
+                      value={formData.role}
+                      onChange={handleChange}
+                      style={{ fontFamily: 'Press Start 2P, cursive', width: '100%', padding: '1rem 1rem 1rem 3rem', border: 'none', background: 'transparent', fontSize: '0.75rem' }}
+                    >
+                      <option value="Teacher">Teacher</option>
+                      <option value="Admin">Admin</option>
+                    </select>
+                  </div>
+                  {errors.role && <span className="error-message">{errors.role}</span>}
+                </div>
+              </div>
+            </>
           )}
 
-          <button type="submit" className="login-button">
-            {isLogin ? 'Sign In' : 'Register'}
+          <button type="submit" className="login-button" disabled={loading}>
+            {loading ? 'Registering...' : isLogin ? 'Sign In' : 'Register'}
           </button>
         </form>
         
