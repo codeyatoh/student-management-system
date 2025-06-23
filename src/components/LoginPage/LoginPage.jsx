@@ -140,7 +140,7 @@ const LoginPage = () => {
         
         <div className="login-footer">
           <p>
-            <span>{isLogin ? "Don't have an account?" : "Already have an account?"}</span>
+            {isLogin ? "Don't have an account?" : "Already have an account?"}
             <a onClick={toggleForm}>
               {isLogin ? 'Register' : 'Sign In'}
             </a>
