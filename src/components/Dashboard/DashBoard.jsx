@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   FaTachometerAlt, FaUser, FaChalkboardTeacher, FaUserShield, FaChalkboard, 
@@ -6,20 +6,37 @@ import {
 } from 'react-icons/fa';
 import './Dashboard.css';
 import nightbyteLogo from '../../assets/nightbyte.png';
+import { db } from '../../assets/firebase-config';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const location = useLocation();
+  const [teacherCount, setTeacherCount] = useState(0);
+  const [adminCount, setAdminCount] = useState(0);
 
-  // TODO: Fetch dynamic stats from Firestore here using useEffect
+  useEffect(() => {
+    // Listen for real-time updates for teachers
+    const unsubTeachers = onSnapshot(collection(db, 'teachers'), (snapshot) => {
+      setTeacherCount(snapshot.size);
+    });
+    // Listen for real-time updates for admins
+    const unsubAdmins = onSnapshot(collection(db, 'admins'), (snapshot) => {
+      setAdminCount(snapshot.size);
+    });
+    return () => {
+      unsubTeachers();
+      unsubAdmins();
+    };
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
   const stats = [
-    { label: 'Students', value: 0, color: '#ff7675', icon: <FaUser /> },
-    { label: 'Teachers', value: 0, color: '#55efc4', icon: <FaChalkboardTeacher /> },
+    { label: 'Teachers', value: teacherCount, color: '#55efc4', icon: <FaChalkboardTeacher /> },
+    { label: 'Admins', value: adminCount, color: '#ff7675', icon: <FaUserShield /> },
     { label: 'Class', value: 0, color: '#a29bfe', icon: <FaSchool /> },
     { label: 'Classrooms', value: 0, color: '#74b9ff', icon: <FaChalkboard /> },
   ];
