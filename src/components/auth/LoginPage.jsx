@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash, FaUser, FaLock, FaEnvelope, FaPhone } from 'react-icons/fa';
 import './LoginPage.css';
-import { db } from '../../assets/firebase-config';
+import { db } from '../../config/firebase-config';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import PixelAlert from '../modals/PixelAlert';
 import bcrypt from 'bcryptjs';
@@ -344,6 +344,7 @@ const LoginPage = () => {
               ? (isLogin ? 'Signing In...' : 'Registering...')
               : isLogin ? 'Sign In' : 'Register'}
           </button>
+          
           {alert.open && (
             <PixelAlert
               message={alert.message}
@@ -366,4 +367,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default LoginPage; 

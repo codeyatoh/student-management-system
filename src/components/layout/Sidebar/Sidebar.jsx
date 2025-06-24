@@ -4,7 +4,7 @@ import {
   FaTachometerAlt, FaUser, FaChalkboardTeacher, FaUserShield, FaChalkboard,
   FaSchool, FaChevronLeft, FaSignOutAlt
 } from 'react-icons/fa';
-import nightbyteLogo from '../../assets/nightbyte.png';
+import nightbyteLogo from '../../../assets/images/nightbyte.png';
 import './Sidebar.css';
 
 const Sidebar = ({ isSidebarCollapsed, toggleSidebar, location }) => (

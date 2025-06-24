@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaChalkboardTeacher, FaUserShield, FaSchool, FaChalkboard } from 'react-icons/fa';
 import './Dashboard.css';
-import { db } from '../../assets/firebase-config';
+import { db } from '../../../config/firebase-config';
 import { collection, onSnapshot } from 'firebase/firestore';
-import Sidebar from '../Sidebar/Sidebar';
+import Sidebar from '../../layout/Sidebar/Sidebar';
 
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
