@@ -21,7 +21,7 @@ const Sidebar = ({ isSidebarCollapsed, toggleSidebar, location }) => (
       <FaTachometerAlt />
       <span>Dashboard</span>
     </Link>
-    <Link to="/add-student" className={`menu-item ${location.pathname === '/add-student' ? 'active' : ''}`}> 
+    <Link to="/students" className={`menu-item ${location.pathname === '/students' ? 'active' : ''}`}> 
       <FaUser />
       <span>Students</span>
     </Link>

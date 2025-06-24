@@ -71,7 +71,10 @@ const LoginPage = () => {
         setLoading(false);
         if (found) {
           setAlert({ open: true, message: `Login successful! (${userRole})`, type: 'success' });
-          navigate('/dashboard');
+          setTimeout(() => {
+            setAlert({ open: false, message: '', type: 'success' });
+            navigate('/dashboard');
+          }, 1200);
         } else {
           setAlert({ open: true, message: 'Invalid email or password', type: 'error' });
           setTimeout(() => setAlert({ open: false, message: '', type: 'success' }), 1800);
