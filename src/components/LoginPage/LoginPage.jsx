@@ -4,7 +4,7 @@ import { FaEye, FaEyeSlash, FaUser, FaLock, FaEnvelope, FaPhone } from 'react-ic
 import './LoginPage.css';
 import { db } from '../../assets/firebase-config';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
-import PixelAlert from '../PixelAlert/PixelAlert';
+import PixelAlert from '../modals/PixelAlert';
 import bcrypt from 'bcryptjs';
 
 const LoginPage = () => {

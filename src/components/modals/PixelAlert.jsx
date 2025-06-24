@@ -1,5 +1,5 @@
-import React from 'react';
 import './PixelAlert.css';
+import React from 'react';
 
 const PixelAlert = ({ message, onClose, type = 'success' }) => {
   return (
