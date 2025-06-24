@@ -1,0 +1,181 @@
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: var(--primary-blue);
+    padding: 20px 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    position: fixed;
+    z-index: 100;
+    will-change: width, transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0 30px;
+    transition: padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo {
+    width: 70px;
+    height: 70px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.logo img {
+    max-width: 45px;
+    transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.toggle-btn {
+    position: absolute;
+    right: -15px;
+    top: 130px;
+    width: 30px;
+    height: 30px;
+    background-color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: none;
+}
+
+.toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+.toggle-btn svg {
+    color: var(--primary-blue);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    font-size: 14px;
+}
+
+.sidebar.collapsed .toggle-btn svg {
+    transform: rotate(180deg);
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 25px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 4px 0;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8rem;
+}
+
+.sidebar.collapsed .menu-item {
+    padding: 15px 28px;
+    justify-content: center;
+}
+
+.menu-item.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    font-weight: 500;
+}
+
+.menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    transform: translateX(4px);
+}
+
+.sidebar.collapsed .menu-item:hover {
+    transform: translateX(0) scale(1.1);
+}
+
+.menu-item svg {
+    font-size: 20px;
+    min-width: 25px;
+    margin-right: 15px;
+    transition: margin 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.sidebar.collapsed .menu-item:hover svg {
+    transform: scale(1.2);
+}
+
+.sidebar.collapsed .menu-item span {
+    max-width: 0;
+    opacity: 0;
+    transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.menu-item span {
+    max-width: 150px;
+    opacity: 1;
+    transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, max-width;
+}
+
+.sidebar.collapsed .menu-item svg {
+    margin-right: 0;
+}
+
+.menu-item .badge {
+    margin-left: auto;
+    background-color: var(--accent-orange);
+    color: var(--white);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed .menu-item .badge {
+    opacity: 0;
+    transform: scale(0);
+}
+
+@media (max-width: 800px) {
+    .sidebar {
+        width: 80px;
+    }
+    .sidebar .menu-item span {
+        display: none;
+    }
+    .sidebar .menu-item svg {
+        margin-right: 0;
+    }
+} 
