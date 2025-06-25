@@ -1,47 +1,86 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../../layout/Sidebar/Sidebar';
-import AddStudentForm from '../../forms/AddStudentForm';
-import ViewStudentModal from '../../modals/ViewStudentModal';
+import AddClassForm from '../../forms/AddClassForm';
+import ViewClassModal from '../../modals/ViewClassModal';
 import DeleteConfirmationModal from '../../modals/DeleteConfirmationModal';
 import { FaEdit, FaTrash, FaSearch, FaPlus, FaEye } from 'react-icons/fa';
 import { db } from '../../../config/firebase-config';
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
-import './StudentsPage.css';
+import './ClassesPage.css';
+import '../../modals/PixelAlert.css';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
 import PixelAlert from '../../modals/PixelAlert';
-import { filterStudents, sortStudents } from '../../../utils/studentHelpers';
+import { 
+  getTeacherName, 
+  getClassroomName, 
+  filterClasses, 
+  sortClasses 
+} from '../../../utils/classHelpers';
 
-const StudentsPage = () => {
+const ClassesPage = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(() => {
     const stored = localStorage.getItem('sidebarCollapsed');
     return stored === 'true';
   });
   const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
-  const [students, setStudents] = useState([]);
+  const [classes, setClasses] = useState([]);
   const [sortBy, setSortBy] = useState('id');
   const [sortOrder, setSortOrder] = useState('asc');
   const [modalState, setModalState] = useState({ view: false, add: false, edit: false, delete: false });
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedClass, setSelectedClass] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [alertInfo, setAlertInfo] = useState({ show: false, message: '', type: 'success' });
 
-  const fetchStudents = useCallback(async () => {
-    const studentsCollection = collection(db, 'students');
-    const q = query(studentsCollection, orderBy("enrollment_date"));
-    const studentSnapshot = await getDocs(q);
-    const studentList = studentSnapshot.docs.map((doc, index) => ({
-      ...doc.data(),
-      id: doc.id,
-      studentNumber: index + 1
-    }));
-    setStudents(studentList);
+  const fetchClasses = useCallback(async () => {
+    try {
+      const classesCollection = collection(db, 'classes');
+      const q = query(classesCollection, orderBy("class_name"));
+      const classSnapshot = await getDocs(q);
+      const classList = classSnapshot.docs.map((doc, index) => ({
+        ...doc.data(),
+        id: doc.id,
+        classNumber: index + 1
+      }));
+      setClasses(classList);
+    } catch (error) {
+      console.error("Error fetching classes:", error);
+      // For now, use mock data if Firebase is not set up
+      setClasses([
+        {
+          id: '1',
+          class_name: 'Math 101',
+          subject: 'Mathematics',
+          schedule: 'Mon 9:00-10:30',
+          teacher_id: 't1',
+          classroom_id: 'c1',
+          classNumber: 1
+        },
+        {
+          id: '2',
+          class_name: 'Physics 201',
+          subject: 'Physics',
+          schedule: 'Wed 11:00-12:30',
+          teacher_id: 't2',
+          classroom_id: 'c2',
+          classNumber: 2
+        },
+        {
+          id: '3',
+          class_name: 'Chemistry 301',
+          subject: 'Chemistry',
+          schedule: 'Fri 14:00-15:30',
+          teacher_id: 't3',
+          classroom_id: 'c3',
+          classNumber: 3
+        }
+      ]);
+    }
   }, []);
 
   useEffect(() => {
-    fetchStudents();
-  }, [fetchStudents]);
+    fetchClasses();
+  }, [fetchClasses]);
 
   useEffect(() => {
     if (alertInfo.show) {
@@ -52,77 +91,54 @@ const StudentsPage = () => {
     }
   }, [alertInfo.show]);
 
-  const handleAddOrUpdateStudent = async (studentData, studentId) => {
+  const handleAddOrUpdateClass = async (classData, classId) => {
     setIsUploading(true);
     try {
-      let photoUrl = studentData.photo_url || '';
-
-      // Check if a new photo file is being uploaded
-      if (studentData.photo && typeof studentData.photo !== 'string') {
-        const formData = new FormData();
-        formData.append('file', studentData.photo);
-        formData.append('upload_preset', 'student-management-system');
-
-        const response = await axios.post(
-          'https://api.cloudinary.com/v1_1/dztwssq5c/image/upload',
-          formData
-        );
-        photoUrl = response.data.secure_url;
-      }
-
-      const studentPayload = { ...studentData, photo_url: photoUrl };
-      delete studentPayload.photo; // Remove the file object before saving
-
-      if (studentId) {
-        // Update existing student
-        const studentDoc = doc(db, 'students', studentId);
-        await updateDoc(studentDoc, studentPayload);
-        setAlertInfo({ show: true, message: 'Student updated successfully!', type: 'success' });
+      if (classId) {
+        // Update existing class
+        const classDoc = doc(db, 'classes', classId);
+        await updateDoc(classDoc, classData);
+        setAlertInfo({ show: true, message: 'Class updated successfully!', type: 'success' });
       } else {
-        // Add new student
-        await addDoc(collection(db, 'students'), studentPayload);
-        setAlertInfo({ show: true, message: 'Student added successfully!', type: 'success' });
+        // Add new class
+        await addDoc(collection(db, 'classes'), classData);
+        setAlertInfo({ show: true, message: 'Class added successfully!', type: 'success' });
       }
       
-      fetchStudents(); // Re-fetch students to update the list
+      fetchClasses(); // Re-fetch classes to update the list
       closeAllModals();
     } catch (error) {
-      console.error("Error saving student:", error);
-      setAlertInfo({ show: true, message: 'Error saving student. Please try again.', type: 'error' });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-  
-  const handleDelete = async () => {
-    if (!selectedStudent) return;
-    setIsUploading(true);
-    try {
-      // Deleting the image from Cloudinary would require a backend with credentials.
-      // For now, we will just delete the reference from Firestore.
-      
-      // Delete document from Firestore
-      await deleteDoc(doc(db, 'students', selectedStudent.id));
-      
-      fetchStudents(); // Re-fetch students to update the list
-      closeAllModals();
-      setAlertInfo({ show: true, message: 'Student deleted successfully!', type: 'success' });
-    } catch (error) {
-      console.error("Error deleting student: ", error);
-      setAlertInfo({ show: true, message: 'Error deleting student. Please try again.', type: 'error' });
+      console.error("Error saving class:", error);
+      setAlertInfo({ show: true, message: 'Error saving class. Please try again.', type: 'error' });
     } finally {
       setIsUploading(false);
     }
   };
 
-  const openModal = (type, student = null) => {
-    setSelectedStudent(student);
+  const handleDelete = async () => {
+    if (!selectedClass) return;
+    setIsUploading(true);
+    try {
+      await deleteDoc(doc(db, 'classes', selectedClass.id));
+      fetchClasses();
+      closeAllModals();
+      setAlertInfo({ show: true, message: 'Class deleted successfully!', type: 'success' });
+    } catch (error) {
+      console.error("Error deleting class: ", error);
+      setAlertInfo({ show: true, message: 'Error deleting class. Please try again.', type: 'error' });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const openModal = (type, classItem = null) => {
+    setSelectedClass(classItem);
     setModalState({ view: type === 'view', add: type === 'add', edit: type === 'edit', delete: type === 'delete' });
   };
 
   const closeAllModals = () => {
     setModalState({ view: false, add: false, edit: false, delete: false });
-    setSelectedStudent(null);
+    setSelectedClass(null);
   };
 
   const toggleSidebar = () => {
@@ -133,22 +149,22 @@ const StudentsPage = () => {
   };
 
   // Use utility functions for filtering and sorting
-  const filteredStudents = filterStudents(students, searchTerm);
-  const sortedStudents = sortStudents(filteredStudents, sortBy, sortOrder);
+  const filteredClasses = filterClasses(classes, searchTerm);
+  const sortedClasses = sortClasses(filteredClasses, sortBy, sortOrder);
 
   return (
-    <div className="students-page">
+    <div className="classes-page">
       <div className={`dashboard-layout`}>
         <Sidebar isSidebarCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} location={location} />
         <div className="main-content">
-          <div className="students-container">
-            <div className="students-header">
+          <div className="classes-container">
+            <div className="classes-header">
               <div className="traffic-lights">
                 <span className="traffic-light red"></span>
                 <span className="traffic-light yellow"></span>
                 <span className="traffic-light green"></span>
               </div>
-              <h2>View Students</h2>
+              <h2>View Classes</h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <select
                   className="sort-dropdown"
@@ -156,9 +172,9 @@ const StudentsPage = () => {
                   onChange={e => setSortBy(e.target.value)}
                 >
                   <option value="id">Sort by ID</option>
-                  <option value="first_name">Sort by Name</option>
-                  <option value="class_id">Sort by Class</option>
-                  <option value="enrollment_date">Sort by Date</option>
+                  <option value="class_name">Sort by Name</option>
+                  <option value="subject">Sort by Subject</option>
+                  <option value="schedule">Sort by Schedule</option>
                 </select>
                 <button
                   className="sort-order-btn"
@@ -167,8 +183,8 @@ const StudentsPage = () => {
                 >
                   {sortOrder === 'asc' ? '↑' : '↓'}
                 </button>
-                <button className="add-student-btn" onClick={() => openModal('add')}>
-                  <FaPlus /> Add Student
+                <button className="add-class-btn" onClick={() => openModal('add')}>
+                  <FaPlus /> Add Class
                 </button>
               </div>
             </div>
@@ -177,61 +193,55 @@ const StudentsPage = () => {
                 <FaSearch className="search-icon" />
                 <input
                   type="text"
-                  placeholder="Search students..."
+                  placeholder="Search classes..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   className="search-input"
                 />
               </div>
             </div>
-            <div className="students-table-container">
-              <table className="students-table">
+            <div className="classes-table-container">
+              <table className="classes-table">
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Contact</th>
-                    <th>Class</th>
-                    <th>Enrollment Date</th>
+                    <th>Class Name</th>
+                    <th>Subject</th>
+                    <th>Schedule</th>
+                    <th>Teacher</th>
+                    <th>Classroom</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedStudents.map(student => (
-                    <tr key={student.id}>
-                      <td>{student.studentNumber || student.id}</td>
-                      <td style={{ paddingLeft: '1.5rem', fontWeight: 'bold' }}>
-                        {student.first_name} {student.last_name}
-                      </td>
-                      <td style={{ paddingLeft: '1.5rem' }}>{student.email}</td>
-                      <td style={{ paddingLeft: '1.5rem' }}>{student.contact_number}</td>
-                      <td style={{ paddingLeft: '1.5rem' }}>{student.class_id}</td>
-                      <td style={{ paddingLeft: '1.5rem' }}>
-                        {student.enrollment_date?.toDate ? 
-                          student.enrollment_date.toDate().toLocaleDateString() : 
-                          student.enrollment_date}
-                      </td>
+                  {sortedClasses.map(cls => (
+                    <tr key={cls.id}>
+                      <td>{cls.classNumber || cls.id}</td>
+                      <td style={{ paddingLeft: '1.5rem', fontWeight: 'bold' }}>{cls.class_name}</td>
+                      <td style={{ paddingLeft: '1.5rem' }}>{cls.subject}</td>
+                      <td style={{ paddingLeft: '1.5rem' }}>{cls.schedule}</td>
+                      <td style={{ paddingLeft: '1.5rem' }}>{getTeacherName(cls.teacher_id)}</td>
+                      <td style={{ paddingLeft: '1.5rem' }}>{getClassroomName(cls.classroom_id)}</td>
                       <td>
                         <div className="action-buttons">
                           <button 
                             className="action-btn view-btn" 
                             title="View"
-                            onClick={() => openModal('view', student)}
+                            onClick={() => openModal('view', cls)}
                           >
                             <FaEye />
                           </button>
                           <button 
                             className="action-btn edit-btn" 
                             title="Edit"
-                            onClick={() => openModal('edit', student)}
+                            onClick={() => openModal('edit', cls)}
                           >
                             <FaEdit />
                           </button>
                           <button 
                             className="action-btn delete-btn" 
                             title="Delete"
-                            onClick={() => openModal('delete', student)}
+                            onClick={() => openModal('delete', cls)}
                           >
                             <FaTrash />
                           </button>
@@ -241,9 +251,9 @@ const StudentsPage = () => {
                   ))}
                 </tbody>
               </table>
-              {sortedStudents.length === 0 && (
-                <div className="no-students">
-                  <p>No students found matching your search criteria.</p>
+              {sortedClasses.length === 0 && (
+                <div className="no-classes">
+                  <p>No classes found matching your search criteria.</p>
                 </div>
               )}
             </div>
@@ -251,11 +261,11 @@ const StudentsPage = () => {
 
           {/* Use separated modal components */}
           {(modalState.add || modalState.edit) && (
-            <AddStudentForm
+            <AddClassForm
               open={modalState.add || modalState.edit}
               onClose={closeAllModals}
-              onSubmit={handleAddOrUpdateStudent}
-              studentToEdit={modalState.edit ? selectedStudent : null}
+              onSubmit={handleAddOrUpdateClass}
+              classToEdit={modalState.edit ? selectedClass : null}
             />
           )}
 
@@ -263,15 +273,15 @@ const StudentsPage = () => {
             <DeleteConfirmationModal 
               onConfirm={handleDelete} 
               onCancel={closeAllModals}
-              title="Delete Student"
-              message={`Are you sure you want to delete "${selectedStudent?.first_name} ${selectedStudent?.last_name}"?`}
+              title="Delete Class"
+              message={`Are you sure you want to delete "${selectedClass?.class_name}"?`}
               subMessage="This action cannot be undone."
             />
           )}
 
           {modalState.view && (
-            <ViewStudentModal 
-              student={selectedStudent} 
+            <ViewClassModal 
+              classData={selectedClass} 
               onClose={closeAllModals} 
             />
           )}
@@ -297,4 +307,4 @@ const StudentsPage = () => {
   );
 };
 
-export default StudentsPage; 
+export default ClassesPage; 

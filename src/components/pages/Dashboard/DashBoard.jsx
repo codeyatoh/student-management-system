@@ -1,42 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { FaChalkboardTeacher, FaUserShield, FaSchool, FaChalkboard } from 'react-icons/fa';
 import './Dashboard.css';
 import { db } from '../../../config/firebase-config';
 import { collection, onSnapshot } from 'firebase/firestore';
 import Sidebar from '../../layout/Sidebar/Sidebar';
+import { getDashboardStats, formatStatNumber } from '../../../utils/dashboardHelpers';
+import { FaChalkboardTeacher, FaUserShield, FaUser, FaSchool } from 'react-icons/fa';
+
+const iconMap = {
+  teachers: <FaChalkboardTeacher />,
+  admins: <FaUserShield />,
+  students: <FaUser />,
+  classes: <FaSchool />,
+};
 
 const Dashboard = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(() => {
+    const stored = localStorage.getItem('sidebarCollapsed');
+    return stored === 'true';
+  });
   const location = useLocation();
   const [teacherCount, setTeacherCount] = useState(0);
   const [adminCount, setAdminCount] = useState(0);
+  const [studentCount, setStudentCount] = useState(0);
+  const [classCount, setClassCount] = useState(0);
 
   useEffect(() => {
     // Listen for real-time updates for teachers
     const unsubTeachers = onSnapshot(collection(db, 'teachers'), (snapshot) => {
       setTeacherCount(snapshot.size);
     });
+    
     // Listen for real-time updates for admins
     const unsubAdmins = onSnapshot(collection(db, 'admins'), (snapshot) => {
       setAdminCount(snapshot.size);
     });
+    
+    // Listen for real-time updates for students
+    const unsubStudents = onSnapshot(collection(db, 'students'), (snapshot) => {
+      setStudentCount(snapshot.size);
+    });
+    
+    // Listen for real-time updates for classes
+    const unsubClasses = onSnapshot(collection(db, 'classes'), (snapshot) => {
+      setClassCount(snapshot.size);
+    });
+    
     return () => {
       unsubTeachers();
       unsubAdmins();
+      unsubStudents();
+      unsubClasses();
     };
   }, []);
 
   const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
+    setIsSidebarCollapsed(prev => {
+      localStorage.setItem('sidebarCollapsed', !prev);
+      return !prev;
+    });
   };
 
-  const stats = [
-    { label: 'Teachers', value: teacherCount, color: '#55efc4', icon: <FaChalkboardTeacher /> },
-    { label: 'Admins', value: adminCount, color: '#ff7675', icon: <FaUserShield /> },
-    { label: 'Class', value: 0, color: '#a29bfe', icon: <FaSchool /> },
-    { label: 'Classrooms', value: 0, color: '#74b9ff', icon: <FaChalkboard /> },
-  ];
+  // Use utility function to get stats configuration
+  const stats = getDashboardStats(teacherCount, adminCount, studentCount, classCount);
 
   return (
     <div className="dashboard-layout">
@@ -51,10 +77,10 @@ const Dashboard = () => {
         <div className="stats-grid">
           {stats.map(stat => (
             <div key={stat.label} className="stat-card" style={{ backgroundColor: stat.color }}>
-              <div className="stat-icon">{stat.icon}</div>
+              <div className="stat-icon">{iconMap[stat.icon]}</div>
               <div className="stat-info">
                 <h4>{stat.label}</h4>
-                <p>{stat.value}</p>
+                <p>{formatStatNumber(stat.value)}</p>
               </div>
             </div>
           ))}

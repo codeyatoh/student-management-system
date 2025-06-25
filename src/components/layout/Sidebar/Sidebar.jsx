@@ -17,27 +17,25 @@ const Sidebar = ({ isSidebarCollapsed, toggleSidebar, location }) => (
     <div className="toggle-btn" id="toggle-btn" onClick={toggleSidebar} aria-label="Toggle Sidebar">
       <FaChevronLeft />
     </div>
-    <Link to="/dashboard" className={`menu-item ${location.pathname === '/dashboard' ? 'active' : ''}`}> 
-      <FaTachometerAlt />
-      <span>Dashboard</span>
-    </Link>
-    <Link to="/students" className={`menu-item ${location.pathname === '/students' ? 'active' : ''}`}> 
-      <FaUser />
-      <span>Students</span>
-    </Link>
-    <Link to="/add-teacher" className={`menu-item ${location.pathname === '/add-teacher' ? 'active' : ''}`}> 
-      <FaChalkboardTeacher />
-      <span>Teachers</span>
-    </Link>
-    <Link to="/add-classroom" className={`menu-item ${location.pathname === '/add-classroom' ? 'active' : ''}`}> 
-      <FaChalkboard />
-      <span>Classrooms</span>
-    </Link>
-    <Link to="/add-class" className={`menu-item ${location.pathname === '/add-class' ? 'active' : ''}`}> 
-      <FaSchool />
-      <span>Add Class</span>
-    </Link>
-    <Link to="/" className="menu-item"> 
+    <div className="menu-list">
+      <Link to="/dashboard" className={`menu-item ${location.pathname === '/dashboard' ? 'active' : ''}`}> 
+        <FaTachometerAlt />
+        <span>Dashboard</span>
+      </Link>
+      <Link to="/students" className={`menu-item ${location.pathname === '/students' ? 'active' : ''}`}> 
+        <FaUser />
+        <span>Students</span>
+      </Link>
+      <Link to="/classes" className={`menu-item ${location.pathname === '/classes' ? 'active' : ''}`}> 
+        <FaSchool />
+        <span>Classes</span>
+      </Link>
+      <Link to="/add-classroom" className={`menu-item ${location.pathname === '/add-classroom' ? 'active' : ''}`}> 
+        <FaChalkboard />
+        <span>Classrooms</span>
+      </Link>
+    </div>
+    <Link to="/" className="menu-item logout"> 
       <FaSignOutAlt />
       <span>Logout</span>
     </Link>

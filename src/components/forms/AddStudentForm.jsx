@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { validateStudentForm } from '../../utils/studentHelpers';
+import Select from 'react-select';
+import { db } from '../../config/firebase-config';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 const AddStudentForm = ({ open, onClose, onSubmit, studentToEdit }) => {
   const [formData, setFormData] = useState({
@@ -15,6 +19,26 @@ const AddStudentForm = ({ open, onClose, onSubmit, studentToEdit }) => {
   });
   const [errors, setErrors] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [classOptions, setClassOptions] = useState([]);
+
+  useEffect(() => {
+    // Fetch classes for dropdown
+    const fetchClasses = async () => {
+      try {
+        const classesCollection = collection(db, 'classes');
+        const q = query(classesCollection, orderBy('class_name'));
+        const classSnapshot = await getDocs(q);
+        const options = classSnapshot.docs.map(doc => ({
+          value: doc.id,
+          label: doc.data().class_name
+        }));
+        setClassOptions(options);
+      } catch (error) {
+        setClassOptions([]);
+      }
+    };
+    fetchClasses();
+  }, []);
 
   useEffect(() => {
     if (open && studentToEdit) {
@@ -64,20 +88,17 @@ const AddStudentForm = ({ open, onClose, onSubmit, studentToEdit }) => {
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    Object.keys(formData).forEach(key => {
-      if (!formData[key]) newErrors[key] = 'This field is required';
-    });
-    if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Please enter a valid email address';
-    if (formData.contact_number && !/^\+?[\d\s-]{10,}$/.test(formData.contact_number)) newErrors.contact_number = 'Please enter a valid contact number';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleClassChange = (selectedOption) => {
+    setFormData(prev => ({ ...prev, class_id: selectedOption ? selectedOption.value : '' }));
+    if (errors.class_id) setErrors(prev => ({ ...prev, class_id: '' }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
+    const newErrors = validateStudentForm(formData);
+    setErrors(newErrors);
+    
+    if (Object.keys(newErrors).length === 0) {
       onSubmit(formData, studentToEdit?.id);
       setFormData({
         first_name: '',
@@ -204,6 +225,7 @@ const AddStudentForm = ({ open, onClose, onSubmit, studentToEdit }) => {
                 value={formData.address}
                 onChange={handleChange}
                 className={errors.address ? 'error' : ''}
+                rows="3"
               />
               {errors.address && <span className="error-message">{errors.address}</span>}
             </div>
@@ -220,14 +242,76 @@ const AddStudentForm = ({ open, onClose, onSubmit, studentToEdit }) => {
               {errors.enrollment_date && <span className="error-message">{errors.enrollment_date}</span>}
             </div>
             <div className="form-group">
-              <label htmlFor="class_id">Class ID</label>
-              <input
-                type="text"
+              <label htmlFor="class_id">Class</label>
+              <Select
                 id="class_id"
                 name="class_id"
-                value={formData.class_id}
-                onChange={handleChange}
+                value={classOptions.find(option => option.value === formData.class_id) || null}
+                onChange={handleClassChange}
+                options={classOptions}
+                placeholder="Select Class..."
+                isClearable
+                classNamePrefix="react-select"
                 className={errors.class_id ? 'error' : ''}
+                styles={{
+                  control: (base, state) => ({
+                    ...base,
+                    minHeight: '2.6rem',
+                    height: '2.6rem',
+                    borderRadius: '4px',
+                    borderColor: errors.class_id ? '#dc3545' : '#2c2c54',
+                    boxShadow: state.isFocused ? '0 0 0 2px #ffbd44' : 'none',
+                    fontFamily: "'Press Start 2P', cursive",
+                    fontSize: '0.9rem',
+                    color: '#2c2c54',
+                    background: '#fff',
+                    paddingLeft: '0',
+                  }),
+                  valueContainer: base => ({
+                    ...base,
+                    padding: '0 0.7rem',
+                  }),
+                  input: base => ({
+                    ...base,
+                    margin: '0',
+                    padding: '0',
+                  }),
+                  placeholder: base => ({
+                    ...base,
+                    color: '#b0b0d0',
+                    fontFamily: "'Press Start 2P', cursive",
+                    fontSize: '0.9rem',
+                  }),
+                  singleValue: base => ({
+                    ...base,
+                    color: '#2c2c54',
+                  }),
+                  menu: base => ({
+                    ...base,
+                    zIndex: 9999,
+                    fontFamily: "'Press Start 2P', cursive",
+                    fontSize: '0.9rem',
+                  }),
+                  option: (base, state) => ({
+                    ...base,
+                    backgroundColor: state.isSelected
+                      ? '#4b4b8b'
+                      : state.isFocused
+                      ? '#e0e0ff'
+                      : '#fff',
+                    color: state.isSelected ? '#fff' : '#2c2c54',
+                    fontFamily: "'Press Start 2P', cursive",
+                    fontSize: '0.9rem',
+                  }),
+                  dropdownIndicator: base => ({
+                    ...base,
+                    color: '#2c2c54',
+                  }),
+                  clearIndicator: base => ({
+                    ...base,
+                    color: '#dc3545',
+                  }),
+                }}
               />
               {errors.class_id && <span className="error-message">{errors.class_id}</span>}
             </div>

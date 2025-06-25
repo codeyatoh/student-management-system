@@ -82,6 +82,12 @@
     transform: rotate(180deg);
 }
 
+.menu-list {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
 .menu-item {
     display: flex;
     align-items: center;
@@ -166,6 +172,10 @@
 .sidebar.collapsed .menu-item .badge {
     opacity: 0;
     transform: scale(0);
+}
+
+.menu-item.logout {
+    margin-bottom: 2rem;
 }
 
 @media (max-width: 800px) {
