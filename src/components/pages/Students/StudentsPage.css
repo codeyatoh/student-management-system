@@ -440,27 +440,69 @@
 
 .add-student-form .file-upload-label {
   display: inline-block;
-  padding: 0.7rem 1.2rem;
+  padding: 0.6rem 1.2rem;
+  font-family: 'Press Start 2P', cursive;
   font-size: 0.9rem;
-  font-weight: 500;
   color: white;
-  background-color: #6ec6ff;
+  background-color: #17a2b8;
   border: 2px solid #222;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.1s;
+  box-shadow: 4px 4px 0px #222;
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.4);
   text-align: center;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 .add-student-form .file-upload-label:hover {
-  background-color: #5a5a9a;
+  background-color: #138496;
+  box-shadow: 2px 2px 0px #222;
+  transform: translate(2px, 2px);
+}
+
+.add-student-form .file-upload-label:active {
+  box-shadow: 0px 0px 0px #222;
+  transform: translate(4px, 4px);
 }
 
 .photo-upload-group {
   grid-column: span 2;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.photo-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-container {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 1rem;
+  width: 100%;
+}
+
+.camera-feed {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border: 2px solid #2c2c54;
+  border-radius: 4px;
+  background-color: #000;
+}
+
+.camera-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
 }
 
 .photo-preview-container {
@@ -524,6 +566,10 @@
   transition: all 0.1s;
   box-shadow: 4px 4px 0px #222;
   text-shadow: 1px 1px 0px rgba(0,0,0,0.4);
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  margin: 0;
 }
 
 .submit-button:hover {
@@ -546,6 +592,31 @@
 
 .cancel-button:hover {
   background-color: #e6e6e6;
+}
+
+.cancel-button.camera-cancel-btn {
+  background-color: #dc3545;
+  color: white;
+  border: 2px solid #222;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.1s;
+  box-shadow: 4px 4px 0px #222;
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.4);
+}
+
+.cancel-button.camera-cancel-btn:hover {
+  background-color: #c82333;
+  box-shadow: 2px 2px 0px #222;
+  transform: translate(2px, 2px);
+}
+
+.cancel-button.camera-cancel-btn:active {
+  box-shadow: 0px 0px 0px #222;
+  transform: translate(4px, 4px);
 }
 
 /* Style for file upload */
@@ -706,6 +777,7 @@
   padding: 0.3rem 0.7rem;
   border-radius: 6px;
   margin-right: 0.5rem;
+  width: 220px;
 }
 
 .sort-order-btn {
@@ -811,6 +883,42 @@
   color: #2c2c54;
 }
 
+.student-classes-section {
+  padding: 0 1.5rem 1.5rem;
+  margin-top: 1rem;
+}
+
+.student-classes-section h4 {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem;
+  color: #2c2c54;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+.mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Press Start 2P', cursive;
+}
+
+.mini-table th,
+.mini-table td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.8rem;
+}
+
+.mini-table th {
+  background-color: #4b4b8b;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
 /* Delete Confirmation Modal Styles */
 .confirmation-buttons {
   display: flex;
@@ -867,4 +975,68 @@
   box-shadow: 8px 8px 0px #000;
   color: #222;
   font-size: 1.5rem;
+}
+
+/* Accordion for Class Assignments in Student Form */
+.assignments-accordion-container {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 0.5rem; /* Space for scrollbar */
+}
+
+.accordion-item {
+  margin-bottom: 1rem;
+  border: 2px solid #2c2c54;
+  border-radius: 4px;
+  box-shadow: 3px 3px 0px #2c2c54;
+}
+
+.accordion-header {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background-color: #f0f0f0;
+  color: #2c2c54;
+  border: none;
+  border-bottom: 2px solid #2c2c54;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.accordion-header.active {
+  background-color: #ffbd44;
+}
+
+.accordion-content {
+  padding: 0.5rem 1rem 1rem 1rem;
+  background-color: #fff;
+  border: none;
+  overflow-x: auto;
+}
+
+.accordion-content .assignments-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.assignments-table th, 
+.assignments-table td {
+  padding: 0.8rem 0.4rem;
+  vertical-align: middle;
+  text-align: left;
+  border-bottom: 1px solid #d4d4d4;
+}
+
+.assignments-table tr:last-child td {
+  border-bottom: none;
+}
+
+.assignments-table th {
+  font-size: 0.8rem;
+  color: #4b4b8b;
+  text-transform: uppercase;
+  background: none;
 } 

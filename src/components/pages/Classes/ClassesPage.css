@@ -431,14 +431,15 @@
 
 /* Sort Controls */
 .sort-dropdown {
-  padding: 0.5rem;
-  border: 2px solid #4b4b8b;
-  border-radius: 4px;
   font-family: 'Press Start 2P', cursive;
-  font-size: 0.8rem;
-  background-color: white;
+  font-size: 1rem;
+  border: 2px solid #4b4b8b;
+  background: #fff;
   color: #2c2c54;
-  cursor: pointer;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  margin-right: 0.5rem;
+  width: 220px;
 }
 
 .sort-order-btn {
@@ -690,4 +691,216 @@
     font-size: 0.6rem;
     padding: 0.3rem 0.6rem;
   }
+}
+
+.form-group input.error,
+.form-group .react-select.error .react-select__control {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+.form-group-dynamic {
+  margin-bottom: 1.5rem;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 0.2rem 0.5rem 0.2rem 0.2rem;
+  border: none;
+  background: none;
+  border-radius: 0;
+}
+
+.form-group-dynamic label {
+  display: block;
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+  color: #2c2c54;
+  font-weight: 500;
+  padding-left: 0.2rem;
+}
+
+/* Custom Scrollbar for Assignments List */
+.form-group-dynamic::-webkit-scrollbar {
+  width: 16px;
+}
+
+.form-group-dynamic::-webkit-scrollbar-track {
+  background: transparent;
+  border-left: none;
+}
+
+.form-group-dynamic::-webkit-scrollbar-thumb {
+  background-color: #4b4b8b;
+  border: 2px solid #2c2c54;
+  border-radius: 4px;
+}
+
+.form-group-dynamic::-webkit-scrollbar-thumb:hover {
+  background-color: #5a5a9a;
+}
+
+.assignment-entry {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #fff;
+  border: 2px solid #2c2c54;
+  border-radius: 6px;
+  box-shadow: 3px 3px 0px #4b4b8b;
+  position: relative;
+}
+
+.assignment-entry .assignment-select .react-select__control {
+  min-height: 2.6rem;
+  height: 2.6rem;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  padding: 0;
+  border: 1.5px solid #4b4b8b;
+  border-radius: 4px;
+  background-color: #fff;
+  box-shadow: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.assignment-entry .assignment-select .react-select__control--is-focused {
+  border-color: #ffbd44;
+  box-shadow: 0 0 0 2px rgba(255, 189, 68, 0.4);
+}
+
+.assignment-entry .assignment-select .react-select__value-container {
+  padding: 0 0.7rem;
+}
+
+.assignment-entry .assignment-select .react-select__placeholder {
+  color: #b0b0d0;
+}
+
+.assignment-entry .assignment-select .react-select__single-value {
+  color: #2c2c54;
+}
+
+.assignment-entry .assignment-select .react-select__indicator-separator {
+  display: none;
+}
+
+.assignment-entry .assignment-select .react-select__dropdown-indicator {
+  color: #4b4b8b;
+}
+
+.assignment-entry .assignment-select .react-select__menu {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  border: 1.5px solid #4b4b8b;
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.assignment-entry .assignment-select .react-select__option {
+  color: #2c2c54;
+  background-color: #fff;
+}
+
+.assignment-entry .assignment-select .react-select__option--is-focused {
+  background-color: #e0e0ff;
+}
+
+.assignment-entry .assignment-select .react-select__option--is-selected {
+  background-color: #4b4b8b;
+  color: white;
+}
+
+.assignment-entry input {
+  height: 2.6rem;
+}
+
+.schedule-entry {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.schedule-entry input {
+  flex-grow: 1;
+  width: auto;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid #4b4b8b;
+  border-radius: 4px;
+  background-color: #fff;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  color: #2c2c54;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.schedule-entry input::placeholder {
+  color: #b0b0d0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.schedule-entry input:focus {
+  outline: none;
+  border-color: #ffbd44;
+  box-shadow: 0 0 0 2px rgba(255, 189, 68, 0.4);
+}
+
+.schedule-entry input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+.add-btn, .remove-btn {
+  font-family: 'Press Start 2P', cursive;
+  border: 2px solid #222;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 4px;
+  box-shadow: 2px 2px 0px #222;
+  transition: all 0.1s;
+}
+
+.add-btn {
+  background-color: #00ca4e;
+  color: white;
+  margin-top: 0.5rem;
+}
+
+.remove-btn {
+  background-color: #dc3545;
+  color: white;
+  font-size: 1.5rem;
+  padding: 0;
+  line-height: 1;
+
+  /* New placement for the button */
+  grid-column: 1 / -1;
+  justify-self: end;
+  margin-top: 0.5rem;
+}
+
+.add-btn:hover, .remove-btn:hover {
+  box-shadow: 1px 1px 0px #222;
+  transform: translate(1px, 1px);
+}
+
+.add-btn:active, .remove-btn:active {
+  box-shadow: 0px 0px 0px #222;
+  transform: translate(2px, 2px);
+}
+
+/* Traffic Lights for fun */
+.traffic-lights {
+  position: absolute;
 } 

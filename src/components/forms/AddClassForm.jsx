@@ -5,12 +5,11 @@ import { db } from '../../config/firebase-config';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 const AddClassForm = ({ open, onClose, onSubmit, classToEdit }) => {
+  const initialAssignment = { teacher_id: '', classroom_id: '', schedule: { day: '', time: '' } };
   const [formData, setFormData] = useState({
     class_name: '',
     subject: '',
-    schedule: '',
-    teacher_id: '',
-    classroom_id: ''
+    assignments: [initialAssignment]
   });
   const [errors, setErrors] = useState({});
   const [teacherOptions, setTeacherOptions] = useState([]);
@@ -40,11 +39,11 @@ const AddClassForm = ({ open, onClose, onSubmit, classToEdit }) => {
     const fetchClassrooms = async () => {
       try {
         const classroomsCollection = collection(db, 'classrooms');
-        const q = query(classroomsCollection, orderBy('name'));
+        const q = query(classroomsCollection, orderBy('room_number'));
         const classroomSnapshot = await getDocs(q);
         const options = classroomSnapshot.docs.map(doc => ({
           value: doc.id,
-          label: doc.data().name
+          label: doc.data().room_number + (doc.data().building_name ? ` (${doc.data().building_name})` : '')
         }));
         setClassroomOptions(options);
       } catch (error) {
@@ -55,23 +54,20 @@ const AddClassForm = ({ open, onClose, onSubmit, classToEdit }) => {
   }, []);
 
   useEffect(() => {
-    if (open && classToEdit) {
-      setFormData({
-        class_name: classToEdit.class_name || '',
-        subject: classToEdit.subject || '',
-        schedule: classToEdit.schedule || '',
-        teacher_id: classToEdit.teacher_id || '',
-        classroom_id: classToEdit.classroom_id || ''
-      });
-    } else {
-      // Reset form when modal is closed or opened for adding
-      setFormData({
-        class_name: '',
-        subject: '',
-        schedule: '',
-        teacher_id: '',
-        classroom_id: ''
-      });
+    if (open) {
+      if (classToEdit) {
+        setFormData({
+          class_name: classToEdit.class_name || '',
+          subject: classToEdit.subject || '',
+          assignments: classToEdit.assignments && classToEdit.assignments.length > 0 ? classToEdit.assignments : [initialAssignment]
+        });
+      } else {
+        setFormData({
+          class_name: '',
+          subject: '',
+          assignments: [initialAssignment]
+        });
+      }
       setErrors({});
     }
   }, [open, classToEdit]);
@@ -83,15 +79,24 @@ const AddClassForm = ({ open, onClose, onSubmit, classToEdit }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
-
-  const handleTeacherChange = (selectedOption) => {
-    setFormData(prev => ({ ...prev, teacher_id: selectedOption ? selectedOption.value : '' }));
-    if (errors.teacher_id) setErrors(prev => ({ ...prev, teacher_id: '' }));
+  
+  const handleAssignmentChange = (index, field, value) => {
+    const newAssignments = [...formData.assignments];
+    if (field === 'day' || field === 'time') {
+      newAssignments[index].schedule[field] = value;
+    } else {
+      newAssignments[index][field] = value;
+    }
+    setFormData(prev => ({ ...prev, assignments: newAssignments }));
   };
 
-  const handleClassroomChange = (selectedOption) => {
-    setFormData(prev => ({ ...prev, classroom_id: selectedOption ? selectedOption.value : '' }));
-    if (errors.classroom_id) setErrors(prev => ({ ...prev, classroom_id: '' }));
+  const addAssignment = () => {
+    setFormData(prev => ({ ...prev, assignments: [...prev.assignments, initialAssignment] }));
+  };
+
+  const removeAssignment = (index) => {
+    const newAssignments = formData.assignments.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, assignments: newAssignments }));
   };
 
   const handleSubmit = (e) => {
@@ -100,25 +105,18 @@ const AddClassForm = ({ open, onClose, onSubmit, classToEdit }) => {
     setErrors(newErrors);
     
     if (Object.keys(newErrors).length === 0) {
-      onSubmit(formData, classToEdit?.id);
-      setFormData({
-        class_name: '',
-        subject: '',
-        schedule: '',
-        teacher_id: '',
-        classroom_id: ''
-      });
+      const formDataWithIds = {
+        ...formData,
+        assignments: formData.assignments.map(a => ({
+          ...a,
+          id: a.id || `as_${Math.random().toString(36).substring(2, 11)}`
+        }))
+      };
+      onSubmit(formDataWithIds, classToEdit?.id);
     }
   };
 
   const handleCancel = () => {
-    setFormData({
-      class_name: '',
-      subject: '',
-      schedule: '',
-      teacher_id: '',
-      classroom_id: ''
-    });
     setErrors({});
     onClose();
   };
@@ -141,6 +139,7 @@ const AddClassForm = ({ open, onClose, onSubmit, classToEdit }) => {
                 value={formData.class_name}
                 onChange={handleChange}
                 className={errors.class_name ? 'error' : ''}
+                placeholder="e.g., Creative Writing 101"
               />
               {errors.class_name && <span className="error-message">{errors.class_name}</span>}
             </div>
@@ -153,170 +152,53 @@ const AddClassForm = ({ open, onClose, onSubmit, classToEdit }) => {
                 value={formData.subject}
                 onChange={handleChange}
                 className={errors.subject ? 'error' : ''}
+                placeholder="e.g., Literature"
               />
               {errors.subject && <span className="error-message">{errors.subject}</span>}
             </div>
-            <div className="form-group">
-              <label htmlFor="schedule">Schedule</label>
-              <input
-                type="text"
-                id="schedule"
-                name="schedule"
-                value={formData.schedule}
-                onChange={handleChange}
-                className={errors.schedule ? 'error' : ''}
-              />
-              {errors.schedule && <span className="error-message">{errors.schedule}</span>}
-            </div>
-            <div className="form-group">
-              <label htmlFor="teacher_id">Teacher</label>
-              <Select
-                id="teacher_id"
-                name="teacher_id"
-                value={teacherOptions.find(option => option.value === formData.teacher_id) || null}
-                onChange={handleTeacherChange}
-                options={teacherOptions}
-                placeholder="Select Teacher..."
-                isClearable
-                classNamePrefix="react-select"
-                className={errors.teacher_id ? 'error' : ''}
-                styles={{
-                  control: (base, state) => ({
-                    ...base,
-                    minHeight: '2.6rem',
-                    height: '2.6rem',
-                    borderRadius: '4px',
-                    borderColor: errors.teacher_id ? '#dc3545' : '#2c2c54',
-                    boxShadow: state.isFocused ? '0 0 0 2px #ffbd44' : 'none',
-                    fontFamily: "'Press Start 2P', cursive",
-                    fontSize: '0.9rem',
-                    color: '#2c2c54',
-                    background: '#fff',
-                    paddingLeft: '0',
-                  }),
-                  valueContainer: base => ({
-                    ...base,
-                    padding: '0 0.7rem',
-                  }),
-                  input: base => ({
-                    ...base,
-                    margin: '0',
-                    padding: '0',
-                  }),
-                  placeholder: base => ({
-                    ...base,
-                    color: '#b0b0d0',
-                    fontFamily: "'Press Start 2P', cursive",
-                    fontSize: '0.9rem',
-                  }),
-                  singleValue: base => ({
-                    ...base,
-                    color: '#2c2c54',
-                  }),
-                  menu: base => ({
-                    ...base,
-                    zIndex: 9999,
-                    fontFamily: "'Press Start 2P', cursive",
-                    fontSize: '0.9rem',
-                  }),
-                  option: (base, state) => ({
-                    ...base,
-                    backgroundColor: state.isSelected
-                      ? '#4b4b8b'
-                      : state.isFocused
-                      ? '#e0e0ff'
-                      : '#fff',
-                    color: state.isSelected ? '#fff' : '#2c2c54',
-                    fontFamily: "'Press Start 2P', cursive",
-                    fontSize: '0.9rem',
-                  }),
-                  dropdownIndicator: base => ({
-                    ...base,
-                    color: '#2c2c54',
-                  }),
-                  clearIndicator: base => ({
-                    ...base,
-                    color: '#dc3545',
-                  }),
-                }}
-              />
-              {errors.teacher_id && <span className="error-message">{errors.teacher_id}</span>}
-            </div>
-            <div className="form-group">
-              <label htmlFor="classroom_id">Classroom</label>
-              <Select
-                id="classroom_id"
-                name="classroom_id"
-                value={classroomOptions.find(option => option.value === formData.classroom_id) || null}
-                onChange={handleClassroomChange}
-                options={classroomOptions}
-                placeholder="Select Classroom..."
-                isClearable
-                classNamePrefix="react-select"
-                className={errors.classroom_id ? 'error' : ''}
-                styles={{
-                  control: (base, state) => ({
-                    ...base,
-                    minHeight: '2.6rem',
-                    height: '2.6rem',
-                    borderRadius: '4px',
-                    borderColor: errors.classroom_id ? '#dc3545' : '#2c2c54',
-                    boxShadow: state.isFocused ? '0 0 0 2px #ffbd44' : 'none',
-                    fontFamily: "'Press Start 2P', cursive",
-                    fontSize: '0.9rem',
-                    color: '#2c2c54',
-                    background: '#fff',
-                    paddingLeft: '0',
-                  }),
-                  valueContainer: base => ({
-                    ...base,
-                    padding: '0 0.7rem',
-                  }),
-                  input: base => ({
-                    ...base,
-                    margin: '0',
-                    padding: '0',
-                  }),
-                  placeholder: base => ({
-                    ...base,
-                    color: '#b0b0d0',
-                    fontFamily: "'Press Start 2P', cursive",
-                    fontSize: '0.9rem',
-                  }),
-                  singleValue: base => ({
-                    ...base,
-                    color: '#2c2c54',
-                  }),
-                  menu: base => ({
-                    ...base,
-                    zIndex: 9999,
-                    fontFamily: "'Press Start 2P', cursive",
-                    fontSize: '0.9rem',
-                  }),
-                  option: (base, state) => ({
-                    ...base,
-                    backgroundColor: state.isSelected
-                      ? '#4b4b8b'
-                      : state.isFocused
-                      ? '#e0e0ff'
-                      : '#fff',
-                    color: state.isSelected ? '#fff' : '#2c2c54',
-                    fontFamily: "'Press Start 2P', cursive",
-                    fontSize: '0.9rem',
-                  }),
-                  dropdownIndicator: base => ({
-                    ...base,
-                    color: '#2c2c54',
-                  }),
-                  clearIndicator: base => ({
-                    ...base,
-                    color: '#dc3545',
-                  }),
-                }}
-              />
-              {errors.classroom_id && <span className="error-message">{errors.classroom_id}</span>}
-            </div>
           </div>
+          
+          <div className="form-group-dynamic">
+            <label>Assignments</label>
+            {formData.assignments.map((assignment, index) => (
+              <div key={index} className="assignment-entry">
+                <Select
+                  value={teacherOptions.find(option => option.value === assignment.teacher_id)}
+                  onChange={(option) => handleAssignmentChange(index, 'teacher_id', option ? option.value : '')}
+                  options={teacherOptions}
+                  placeholder="Select Teacher..."
+                  classNamePrefix="react-select"
+                  className="assignment-select"
+                />
+                <Select
+                  value={classroomOptions.find(option => option.value === assignment.classroom_id)}
+                  onChange={(option) => handleAssignmentChange(index, 'classroom_id', option ? option.value : '')}
+                  options={classroomOptions}
+                  placeholder="Select Classroom..."
+                  classNamePrefix="react-select"
+                  className="assignment-select"
+                />
+                <input
+                  type="text"
+                  value={assignment.schedule.day}
+                  onChange={(e) => handleAssignmentChange(index, 'day', e.target.value)}
+                  placeholder="e.g., MWF"
+                />
+                <input
+                  type="text"
+                  value={assignment.schedule.time}
+                  onChange={(e) => handleAssignmentChange(index, 'time', e.target.value)}
+                  placeholder="e.g., 9-10:30 AM"
+                />
+                {formData.assignments.length > 1 && (
+                  <button type="button" onClick={() => removeAssignment(index)} className="remove-btn">-</button>
+                )}
+              </div>
+            ))}
+            <button type="button" onClick={addAssignment} className="add-btn">+</button>
+            {errors.assignments && <span className="error-message">{errors.assignments}</span>}
+          </div>
+
           <div className="form-actions">
             <button type="submit" className="submit-button">
               {classToEdit ? 'Update Class' : 'Add Class'}

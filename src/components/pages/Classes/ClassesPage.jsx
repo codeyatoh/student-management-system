@@ -5,14 +5,12 @@ import ViewClassModal from '../../modals/ViewClassModal';
 import DeleteConfirmationModal from '../../modals/DeleteConfirmationModal';
 import { FaEdit, FaTrash, FaSearch, FaPlus, FaEye } from 'react-icons/fa';
 import { db } from '../../../config/firebase-config';
-import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import './ClassesPage.css';
 import '../../modals/PixelAlert.css';
 import { useLocation } from 'react-router-dom';
 import PixelAlert from '../../modals/PixelAlert';
 import { 
-  getTeacherName, 
-  getClassroomName, 
   filterClasses, 
   sortClasses 
 } from '../../../utils/classHelpers';
@@ -32,55 +30,20 @@ const ClassesPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [alertInfo, setAlertInfo] = useState({ show: false, message: '', type: 'success' });
 
-  const fetchClasses = useCallback(async () => {
-    try {
-      const classesCollection = collection(db, 'classes');
-      const q = query(classesCollection, orderBy("class_name"));
-      const classSnapshot = await getDocs(q);
+  // Fetch classes from Firestore (real-time)
+  useEffect(() => {
+    const classesCollection = collection(db, 'classes');
+    const q = query(classesCollection, orderBy('class_name'));
+    const unsubscribe = onSnapshot(q, (classSnapshot) => {
       const classList = classSnapshot.docs.map((doc, index) => ({
         ...doc.data(),
         id: doc.id,
         classNumber: index + 1
       }));
       setClasses(classList);
-    } catch (error) {
-      console.error("Error fetching classes:", error);
-      // For now, use mock data if Firebase is not set up
-      setClasses([
-        {
-          id: '1',
-          class_name: 'Math 101',
-          subject: 'Mathematics',
-          schedule: 'Mon 9:00-10:30',
-          teacher_id: 't1',
-          classroom_id: 'c1',
-          classNumber: 1
-        },
-        {
-          id: '2',
-          class_name: 'Physics 201',
-          subject: 'Physics',
-          schedule: 'Wed 11:00-12:30',
-          teacher_id: 't2',
-          classroom_id: 'c2',
-          classNumber: 2
-        },
-        {
-          id: '3',
-          class_name: 'Chemistry 301',
-          subject: 'Chemistry',
-          schedule: 'Fri 14:00-15:30',
-          teacher_id: 't3',
-          classroom_id: 'c3',
-          classNumber: 3
-        }
-      ]);
-    }
+    });
+    return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    fetchClasses();
-  }, [fetchClasses]);
 
   useEffect(() => {
     if (alertInfo.show) {
@@ -104,8 +67,7 @@ const ClassesPage = () => {
         await addDoc(collection(db, 'classes'), classData);
         setAlertInfo({ show: true, message: 'Class added successfully!', type: 'success' });
       }
-      
-      fetchClasses(); // Re-fetch classes to update the list
+      // No need to call fetchClasses, real-time listener will update
       closeAllModals();
     } catch (error) {
       console.error("Error saving class:", error);
@@ -120,7 +82,7 @@ const ClassesPage = () => {
     setIsUploading(true);
     try {
       await deleteDoc(doc(db, 'classes', selectedClass.id));
-      fetchClasses();
+      // No need to call fetchClasses, real-time listener will update
       closeAllModals();
       setAlertInfo({ show: true, message: 'Class deleted successfully!', type: 'success' });
     } catch (error) {
@@ -208,8 +170,6 @@ const ClassesPage = () => {
                     <th>Class Name</th>
                     <th>Subject</th>
                     <th>Schedule</th>
-                    <th>Teacher</th>
-                    <th>Classroom</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -220,8 +180,6 @@ const ClassesPage = () => {
                       <td style={{ paddingLeft: '1.5rem', fontWeight: 'bold' }}>{cls.class_name}</td>
                       <td style={{ paddingLeft: '1.5rem' }}>{cls.subject}</td>
                       <td style={{ paddingLeft: '1.5rem' }}>{cls.schedule}</td>
-                      <td style={{ paddingLeft: '1.5rem' }}>{getTeacherName(cls.teacher_id)}</td>
-                      <td style={{ paddingLeft: '1.5rem' }}>{getClassroomName(cls.classroom_id)}</td>
                       <td>
                         <div className="action-buttons">
                           <button 

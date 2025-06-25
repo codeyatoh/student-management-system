@@ -1,44 +1,59 @@
-// Static options for teachers and classrooms
-export const teacherOptions = [];
-
-export const classroomOptions = [];
-
-// Helper functions
-export const getTeacherName = (id) => teacherOptions.find(t => t.id === id)?.name || id;
-export const getClassroomName = (id) => classroomOptions.find(c => c.id === id)?.name || id;
-
-// Form validation
-export const validateClassForm = (formData) => {
-  const errors = {};
-  Object.keys(formData).forEach(key => {
-    if (!formData[key]) {
-      errors[key] = 'This field is required';
-    }
-  });
-  return errors;
-};
-
-// Filter classes based on search term
 export const filterClasses = (classes, searchTerm) => {
-  return classes.filter(cls =>
-    cls.class_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cls.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getTeacherName(cls.teacher_id).toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getClassroomName(cls.classroom_id).toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  if (!searchTerm) {
+    return classes;
+  }
+  const lowerCaseSearchTerm = searchTerm.toLowerCase();
+
+  return classes.filter(cls => {
+    // Also search through assignments' schedules
+    const assignmentSchedules = (cls.assignments || [])
+      .map(a => `${a.schedule.day || ''} ${a.schedule.time || ''}`)
+      .join(', ')
+      .toLowerCase();
+
+    return (
+      (cls.class_name && cls.class_name.toLowerCase().includes(lowerCaseSearchTerm)) ||
+      (cls.subject && cls.subject.toLowerCase().includes(lowerCaseSearchTerm)) ||
+      (assignmentSchedules.includes(lowerCaseSearchTerm))
+    );
+  });
 };
 
-// Sort classes
 export const sortClasses = (classes, sortBy, sortOrder) => {
   return [...classes].sort((a, b) => {
     let valA = a[sortBy];
     let valB = b[sortBy];
-    if (sortBy === 'class_name' || sortBy === 'subject' || sortBy === 'schedule') {
+
+    if (sortBy === 'id') {
+      valA = a.classNumber;
+      valB = b.classNumber;
+    } else if (typeof valA === 'string') {
       valA = valA.toLowerCase();
       valB = valB.toLowerCase();
     }
+    
     if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
     if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
     return 0;
   });
-}; 
+};
+
+export const validateClassForm = (formData) => {
+  const newErrors = {};
+  if (!formData.class_name) newErrors.class_name = 'Class name is required';
+  if (!formData.subject) newErrors.subject = 'Subject is required';
+
+  if (!formData.assignments || formData.assignments.length === 0) {
+    newErrors.assignments = 'At least one assignment is required.';
+  } else {
+    const areAllAssignmentsValid = formData.assignments.every(a => 
+      a.teacher_id && a.classroom_id && a.schedule.day && a.schedule.time
+    );
+
+    if (!areAllAssignmentsValid) {
+      newErrors.assignments = 'Each assignment must have a teacher, classroom, day, and time.';
+    }
+  }
+
+  return newErrors;
+};

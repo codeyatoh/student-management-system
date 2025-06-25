@@ -86,6 +86,13 @@ const StudentsPage = () => {
       
       fetchStudents(); // Re-fetch students to update the list
       closeAllModals();
+
+      // Clear the temporary form data from localStorage on successful submission
+      if (!studentId) { // Only clear if it was a new student
+        localStorage.removeItem('tempStudentData');
+        localStorage.removeItem('tempStudentStep');
+      }
+
     } catch (error) {
       console.error("Error saving student:", error);
       setAlertInfo({ show: true, message: 'Error saving student. Please try again.', type: 'error' });
@@ -157,7 +164,6 @@ const StudentsPage = () => {
                 >
                   <option value="id">Sort by ID</option>
                   <option value="first_name">Sort by Name</option>
-                  <option value="class_id">Sort by Class</option>
                   <option value="enrollment_date">Sort by Date</option>
                 </select>
                 <button
@@ -192,21 +198,19 @@ const StudentsPage = () => {
                     <th>Name</th>
                     <th>Email</th>
                     <th>Contact</th>
-                    <th>Class</th>
                     <th>Enrollment Date</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedStudents.map(student => (
+                  {sortedStudents.map((student, idx) => (
                     <tr key={student.id}>
-                      <td>{student.studentNumber || student.id}</td>
+                      <td>{`STU${new Date().getFullYear()}-${String(idx + 1).padStart(3, '0')}`}</td>
                       <td style={{ paddingLeft: '1.5rem', fontWeight: 'bold' }}>
                         {student.first_name} {student.last_name}
                       </td>
                       <td style={{ paddingLeft: '1.5rem' }}>{student.email}</td>
                       <td style={{ paddingLeft: '1.5rem' }}>{student.contact_number}</td>
-                      <td style={{ paddingLeft: '1.5rem' }}>{student.class_id}</td>
                       <td style={{ paddingLeft: '1.5rem' }}>
                         {student.enrollment_date?.toDate ? 
                           student.enrollment_date.toDate().toLocaleDateString() : 

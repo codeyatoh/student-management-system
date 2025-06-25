@@ -1,0 +1,129 @@
+/* Import existing styles from StudentsPage.css */
+@import url('../Students/StudentsPage.css');
+
+/* Classroom-specific styles */
+.classroom-container {
+  /* Inherits from students-container */
+}
+
+.classroom-header {
+  /* Inherits from students-header */
+}
+
+.classroom-table-container {
+  /* Inherits from students-table-container */
+}
+
+.classroom-table {
+  /* Inherits from students-table */
+}
+
+/* Additional classroom-specific styles if needed */
+.classroom-resources {
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+.classroom-capacity {
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Modal specific styles for classroom form */
+.classroom-form-modal .modal-content {
+  max-width: 600px;
+}
+
+.classroom-form-modal .form-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.classroom-form-modal .form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Error message styles */
+.error-message {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  font-family: 'Press Start 2P', cursive;
+}
+
+.add-student-form .form-group input.error,
+.add-student-form .form-group textarea.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Modal body styles for delete confirmation */
+.modal-body {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.modal-body p {
+  margin: 0.5rem 0;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Responsive adjustments for classroom page */
+@media (max-width: 768px) {
+  .classroom-form-modal .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .classroom-resources {
+    max-width: 150px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .classroom-form-modal .modal-content {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.header-actions .search-wrapper {
+  min-width: 220px;
+  max-width: 320px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-left: 0;
+    width: 100%;
+  }
+  .header-actions .search-wrapper {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+.sort-dropdown {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 1rem;
+  border: 2px solid #4b4b8b;
+  background: #fff;
+  color: #2c2c54;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  margin-right: 0.5rem;
+  width: 220px;
+} 
