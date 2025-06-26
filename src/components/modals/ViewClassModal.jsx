@@ -70,24 +70,24 @@ const ViewClassModal = ({ classData, onClose }) => {
           <p><strong>Subject:</strong> {classData.subject}</p>
           
           <div className="details-section">
-            <strong>Assignments:</strong>
+            <strong>Class Schedules:</strong>
             {isLoading ? <p>Loading...</p> : (
-              <table className="mini-table assignments-table" style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'inherit', fontSize: '0.95rem', background: '#fff', borderRadius: '6px', overflow: 'hidden' }}>
+              <table className="mini-table assignments-table">
                 <thead>
-                  <tr>
-                    <th>Teacher</th>
-                    <th>Classroom</th>
-                    <th>Day</th>
-                    <th>Time</th>
+                  <tr style={{ background: '#4b4b8b', color: '#fff' }}>
+                    <th style={{ color: '#fff' }}>TEACHER</th>
+                    <th style={{ color: '#fff' }}>CLASSROOM</th>
+                    <th style={{ textAlign: 'center', color: '#fff' }}>DAY</th>
+                    <th style={{ textAlign: 'center', color: '#fff' }}>TIME</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {assignments.map((a, index) => (
-                    <tr key={index}>
-                      <td>{a.teacherName}</td>
-                      <td>{a.classroomName}</td>
-                      <td>{a.schedule.day || 'N/A'}</td>
-                      <td>{a.schedule.time || 'N/A'}</td>
+                  {assignments.map((assignment, idx) => (
+                    <tr key={idx}>
+                      <td>{assignment.teacher_name}</td>
+                      <td>{assignment.classroomName}</td>
+                      <td style={{ textAlign: 'center' }}>{assignment.schedule && assignment.schedule.day ? assignment.schedule.day : ''}</td>
+                      <td style={{ textAlign: 'center' }}>{assignment.schedule && assignment.schedule.time ? assignment.schedule.time : ''}</td>
                     </tr>
                   ))}
                 </tbody>

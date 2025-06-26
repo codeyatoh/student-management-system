@@ -47,7 +47,7 @@ export const validateClassForm = (formData) => {
     newErrors.assignments = 'At least one assignment is required.';
   } else {
     const areAllAssignmentsValid = formData.assignments.every(a => 
-      a.teacher_id && a.classroom_id && a.schedule.day && a.schedule.time
+      a.teacher_name && a.classroom_id && a.schedule.day && a.schedule.time
     );
 
     if (!areAllAssignmentsValid) {

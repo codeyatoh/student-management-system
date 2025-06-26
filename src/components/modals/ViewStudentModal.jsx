@@ -13,19 +13,13 @@ const ViewStudentModal = ({ student, onClose }) => {
         setIsLoading(true);
         try {
           // Fetch all data needed for mapping
-          const [classSnapshot, teacherSnapshot, classroomSnapshot] = await Promise.all([
+          const [classSnapshot, classroomSnapshot] = await Promise.all([
             getDocs(collection(db, 'classes')),
-            getDocs(collection(db, 'teachers')),
             getDocs(collection(db, 'classrooms'))
           ]);
           
           const classMap = classSnapshot.docs.reduce((acc, doc) => {
             acc[doc.id] = { id: doc.id, ...doc.data() };
-            return acc;
-          }, {});
-
-          const teacherMap = teacherSnapshot.docs.reduce((acc, doc) => {
-            acc[doc.id] = doc.data();
             return acc;
           }, {});
 
@@ -37,19 +31,15 @@ const ViewStudentModal = ({ student, onClose }) => {
           const details = student.enrollments.map(enrollment => {
             const cls = classMap[enrollment.classId];
             if (!cls || !cls.assignments) return null;
-            
             const assignment = cls.assignments.find(a => a.id === enrollment.assignmentId);
             if (!assignment) return null;
-            
-            const teacher = teacherMap[assignment.teacher_id];
             const classroom = classroomMap[assignment.classroom_id];
-
             return {
               classId: cls.id,
               assignmentId: assignment.id,
               className: cls.class_name,
               subject: cls.subject,
-              teacherName: teacher ? `${teacher.first_name} ${teacher.last_name}` : 'N/A',
+              teacherName: assignment.teacher_name || 'N/A',
               classroomName: classroom ? `${classroom.room_number} (${classroom.building_name})` : 'N/A',
               schedule: `${assignment.schedule.day} ${assignment.schedule.time}`,
             };
@@ -99,26 +89,30 @@ const ViewStudentModal = ({ student, onClose }) => {
           </div>
         </div>
         <div className="student-classes-section">
-          <h4>Enrolled Assignments ({enrolledAssignments.length})</h4>
+          <h3 style={{ fontWeight: 'bold', color: '#2c2c54', fontSize: '1.1rem', margin: '1.5rem 0 0.5rem 0' }}>
+            Enrolled Subjects ({enrolledAssignments.length})
+          </h3>
           {isLoading ? (
             <p>Loading classes...</p>
           ) : enrolledAssignments.length > 0 ? (
-            <table className="mini-table assignments-table" style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'inherit', fontSize: '0.95rem', background: '#fff', borderRadius: '6px', overflow: 'hidden' }}>
+            <table className="mini-table" style={{ maxWidth: '600px', margin: '0 auto', marginTop: '1rem' }}>
               <thead>
                 <tr>
-                  <th>Class</th>
-                  <th>Teacher</th>
-                  <th>Classroom</th>
-                  <th>Schedule</th>
+                  <th style={{ padding: '0.5rem', border: '1px solid #ddd', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Class</th>
+                  <th style={{ padding: '0.5rem', border: '1px solid #ddd', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Classroom</th>
+                  <th style={{ padding: '0.5rem', border: '1px solid #ddd', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Schedule</th>
+                  <th style={{ padding: '0.5rem', border: '1px solid #ddd', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Teacher</th>
                 </tr>
               </thead>
               <tbody>
-                {enrolledAssignments.map((enrollment) => (
-                  <tr key={`${enrollment.classId}-${enrollment.assignmentId}`}>
-                    <td>{enrollment.className}</td>
-                    <td>{enrollment.teacherName}</td>
-                    <td>{enrollment.classroomName}</td>
-                    <td>{enrollment.schedule}</td>
+                {enrolledAssignments.map((assignment, idx) => (
+                  <tr key={idx}>
+                    <td style={{ padding: '0.5rem', border: '1px solid #ddd', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {assignment.className} {assignment.subject ? `(${assignment.subject})` : ''}
+                    </td>
+                    <td style={{ padding: '0.5rem', border: '1px solid #ddd', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{assignment.classroomName}</td>
+                    <td style={{ padding: '0.5rem', border: '1px solid #ddd', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{assignment.schedule}</td>
+                    <td style={{ padding: '0.5rem', border: '1px solid #ddd', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{assignment.teacherName || 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>

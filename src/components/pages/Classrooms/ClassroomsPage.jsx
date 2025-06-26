@@ -28,6 +28,8 @@ const ClassroomsPage = () => {
   const [teachers, setTeachers] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [filteredClasses, setFilteredClasses] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const classroomsPerPage = 10;
 
   // Fetch classrooms from Firestore (real-time)
   useEffect(() => {
@@ -131,6 +133,9 @@ const ClassroomsPage = () => {
     if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
     return 0;
   });
+
+  const totalPages = Math.ceil(sortedClassrooms.length / classroomsPerPage);
+  const paginatedClassrooms = sortedClassrooms.slice((currentPage - 1) * classroomsPerPage, currentPage * classroomsPerPage);
 
   // When opening the view modal, filter students and classes for the selected classroom
   const handleViewClassroom = (classroom) => {
@@ -236,18 +241,16 @@ const ClassroomsPage = () => {
                   <th>Room Number</th>
                   <th>Building Name</th>
                   <th>Capacity</th>
-                  <th>Available Resources</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedClassrooms.map((room, idx) => (
+                {paginatedClassrooms.map((room, idx) => (
                   <tr key={room.id}>
-                    <td>{idx + 1}</td>
+                    <td>{(currentPage - 1) * classroomsPerPage + idx + 1}</td>
                     <td>{room.room_number}</td>
                     <td>{room.building_name}</td>
                     <td>{room.capacity}</td>
-                    <td>{Array.isArray(room.available_resources) ? room.available_resources.join(', ') : room.available_resources}</td>
                     <td>
                       <div className="action-buttons">
                         <button 
@@ -277,6 +280,34 @@ const ClassroomsPage = () => {
                 ))}
               </tbody>
             </table>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="pagination-container">
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  &#8592; Prev
+                </button>
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    className={`pagination-btn${currentPage === i + 1 ? ' active' : ''}`}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next &#8594;
+                </button>
+              </div>
+            )}
             {filteredClassrooms.length === 0 && (
               <div className="no-students">
                 <p>No classrooms found matching your search criteria.</p>

@@ -1039,4 +1039,40 @@
   color: #4b4b8b;
   text-transform: uppercase;
   background: none;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0 0.5rem 0;
+  font-family: 'Press Start 2P', cursive;
+}
+
+.pagination-btn {
+  background: #4b4b8b;
+  color: #fff;
+  border: 2px solid #222;
+  border-radius: 4px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.9rem;
+  padding: 0.5rem 1.1rem;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #222;
+  transition: background 0.1s, color 0.1s, box-shadow 0.1s;
+  outline: none;
+}
+
+.pagination-btn:hover:not(:disabled), .pagination-btn.active {
+  background: #00ca4e;
+  color: #fff;
+  box-shadow: 1px 1px 0px #222;
+}
+
+.pagination-btn:disabled {
+  background: #b0b0d0;
+  color: #fff;
+  cursor: not-allowed;
+  box-shadow: none;
 } 

@@ -29,6 +29,8 @@ const ClassesPage = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [alertInfo, setAlertInfo] = useState({ show: false, message: '', type: 'success' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const classesPerPage = 10;
 
   // Fetch classes from Firestore (real-time)
   useEffect(() => {
@@ -113,6 +115,8 @@ const ClassesPage = () => {
   // Use utility functions for filtering and sorting
   const filteredClasses = filterClasses(classes, searchTerm);
   const sortedClasses = sortClasses(filteredClasses, sortBy, sortOrder);
+  const totalPages = Math.ceil(sortedClasses.length / classesPerPage);
+  const paginatedClasses = sortedClasses.slice((currentPage - 1) * classesPerPage, currentPage * classesPerPage);
 
   return (
     <div className="classes-page">
@@ -173,7 +177,7 @@ const ClassesPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedClasses.map(cls => (
+                  {paginatedClasses.map(cls => (
                     <tr key={cls.id}>
                       <td>{cls.classNumber || cls.id}</td>
                       <td style={{ paddingLeft: '1.5rem', fontWeight: 'bold' }}>{cls.class_name}</td>
@@ -207,6 +211,34 @@ const ClassesPage = () => {
                   ))}
                 </tbody>
               </table>
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="pagination-container">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    &#8592; Prev
+                  </button>
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i}
+                      className={`pagination-btn${currentPage === i + 1 ? ' active' : ''}`}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next &#8594;
+                  </button>
+                </div>
+              )}
               {sortedClasses.length === 0 && (
                 <div className="no-classes">
                   <p>No classes found matching your search criteria.</p>

@@ -4,8 +4,7 @@ const AddClassroomForm = ({ open, onClose, onSubmit, classroomToEdit }) => {
   const [formData, setFormData] = useState({
     room_number: '',
     building_name: '',
-    capacity: '',
-    available_resources: ''
+    capacity: ''
   });
   const [errors, setErrors] = useState({});
 
@@ -14,15 +13,13 @@ const AddClassroomForm = ({ open, onClose, onSubmit, classroomToEdit }) => {
       setFormData({
         room_number: classroomToEdit.room_number || '',
         building_name: classroomToEdit.building_name || '',
-        capacity: classroomToEdit.capacity ? classroomToEdit.capacity.toString() : '',
-        available_resources: classroomToEdit.available_resources ? classroomToEdit.available_resources.join(', ') : ''
+        capacity: classroomToEdit.capacity ? classroomToEdit.capacity.toString() : ''
       });
     } else if (open) {
       setFormData({
         room_number: '',
         building_name: '',
-        capacity: '',
-        available_resources: ''
+        capacity: ''
       });
       setErrors({});
     }
@@ -42,7 +39,6 @@ const AddClassroomForm = ({ open, onClose, onSubmit, classroomToEdit }) => {
     if (!formData.building_name) newErrors.building_name = 'Building name is required';
     if (!formData.capacity) newErrors.capacity = 'Capacity is required';
     else if (isNaN(formData.capacity) || Number(formData.capacity) <= 0) newErrors.capacity = 'Capacity must be a positive number';
-    if (!formData.available_resources) newErrors.available_resources = 'Available resources are required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -52,8 +48,7 @@ const AddClassroomForm = ({ open, onClose, onSubmit, classroomToEdit }) => {
     if (validateForm()) {
       onSubmit({
         ...formData,
-        capacity: Number(formData.capacity),
-        available_resources: formData.available_resources.split(',').map(r => r.trim()).filter(Boolean)
+        capacity: Number(formData.capacity)
       }, classroomToEdit?.id);
     }
   };
@@ -62,8 +57,7 @@ const AddClassroomForm = ({ open, onClose, onSubmit, classroomToEdit }) => {
     setFormData({
       room_number: '',
       building_name: '',
-      capacity: '',
-      available_resources: ''
+      capacity: ''
     });
     setErrors({});
     onClose();
@@ -89,7 +83,7 @@ const AddClassroomForm = ({ open, onClose, onSubmit, classroomToEdit }) => {
                 value={formData.room_number}
                 onChange={handleChange}
                 className={errors.room_number ? 'error' : ''}
-                placeholder="e.g., 101, B202"
+                placeholder="Room Number"
               />
               {errors.room_number && <span className="error-message">{errors.room_number}</span>}
             </div>
@@ -102,7 +96,7 @@ const AddClassroomForm = ({ open, onClose, onSubmit, classroomToEdit }) => {
                 value={formData.building_name}
                 onChange={handleChange}
                 className={errors.building_name ? 'error' : ''}
-                placeholder="e.g., Main Building, Annex A"
+                placeholder="Building Name"
               />
               {errors.building_name && <span className="error-message">{errors.building_name}</span>}
             </div>
@@ -115,23 +109,10 @@ const AddClassroomForm = ({ open, onClose, onSubmit, classroomToEdit }) => {
                 value={formData.capacity}
                 onChange={handleChange}
                 className={errors.capacity ? 'error' : ''}
+                placeholder="Capacity"
                 min="1"
-                placeholder="e.g., 50"
               />
               {errors.capacity && <span className="error-message">{errors.capacity}</span>}
-            </div>
-            <div className="form-group full-width">
-              <label htmlFor="available_resources">Available Resources (comma separated)</label>
-              <textarea
-                id="available_resources"
-                name="available_resources"
-                value={formData.available_resources}
-                onChange={handleChange}
-                className={errors.available_resources ? 'error' : ''}
-                rows="3"
-                placeholder="e.g., Projector, Whiteboard, WiFi"
-              />
-              {errors.available_resources && <span className="error-message">{errors.available_resources}</span>}
             </div>
           </div>
           <div className="form-actions">

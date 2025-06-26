@@ -5,34 +5,14 @@ import { db } from '../../config/firebase-config';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 const AddClassForm = ({ open, onClose, onSubmit, classToEdit }) => {
-  const initialAssignment = { teacher_id: '', classroom_id: '', schedule: { day: '', time: '' } };
+  const initialAssignment = { teacher_name: '', classroom_id: '', schedule: { day: '', time: '' } };
   const [formData, setFormData] = useState({
     class_name: '',
     subject: '',
     assignments: [initialAssignment]
   });
   const [errors, setErrors] = useState({});
-  const [teacherOptions, setTeacherOptions] = useState([]);
   const [classroomOptions, setClassroomOptions] = useState([]);
-
-  useEffect(() => {
-    // Fetch teachers for dropdown
-    const fetchTeachers = async () => {
-      try {
-        const teachersCollection = collection(db, 'teachers');
-        const q = query(teachersCollection, orderBy('first_name'));
-        const teacherSnapshot = await getDocs(q);
-        const options = teacherSnapshot.docs.map(doc => ({
-          value: doc.id,
-          label: (doc.data().first_name || '') + (doc.data().last_name ? ' ' + doc.data().last_name : '')
-        }));
-        setTeacherOptions(options);
-      } catch (error) {
-        setTeacherOptions([]);
-      }
-    };
-    fetchTeachers();
-  }, []);
 
   useEffect(() => {
     // Fetch classrooms for dropdown
@@ -162,13 +142,11 @@ const AddClassForm = ({ open, onClose, onSubmit, classToEdit }) => {
             <label>Assignments</label>
             {formData.assignments.map((assignment, index) => (
               <div key={index} className="assignment-entry">
-                <Select
-                  value={teacherOptions.find(option => option.value === assignment.teacher_id)}
-                  onChange={(option) => handleAssignmentChange(index, 'teacher_id', option ? option.value : '')}
-                  options={teacherOptions}
-                  placeholder="Select Teacher..."
-                  classNamePrefix="react-select"
-                  className="assignment-select"
+                <input
+                  type="text"
+                  value={assignment.teacher_name || ''}
+                  onChange={e => handleAssignmentChange(index, 'teacher_name', e.target.value)}
+                  placeholder="Enter Teacher Name"
                 />
                 <Select
                   value={classroomOptions.find(option => option.value === assignment.classroom_id)}

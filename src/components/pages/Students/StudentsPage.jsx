@@ -26,6 +26,8 @@ const StudentsPage = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [alertInfo, setAlertInfo] = useState({ show: false, message: '', type: 'success' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const studentsPerPage = 10;
 
   const fetchStudents = useCallback(async () => {
     const studentsCollection = collection(db, 'students');
@@ -143,6 +145,10 @@ const StudentsPage = () => {
   const filteredStudents = filterStudents(students, searchTerm);
   const sortedStudents = sortStudents(filteredStudents, sortBy, sortOrder);
 
+  // Calculate paginated students
+  const totalPages = Math.ceil(sortedStudents.length / studentsPerPage);
+  const paginatedStudents = sortedStudents.slice((currentPage - 1) * studentsPerPage, currentPage * studentsPerPage);
+
   return (
     <div className="students-page">
       <div className={`dashboard-layout`}>
@@ -203,9 +209,9 @@ const StudentsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedStudents.map((student, idx) => (
+                  {paginatedStudents.map((student, idx) => (
                     <tr key={student.id}>
-                      <td>{`STU${new Date().getFullYear()}-${String(idx + 1).padStart(3, '0')}`}</td>
+                      <td>{`STU${new Date().getFullYear()}-${String((currentPage - 1) * studentsPerPage + idx + 1).padStart(3, '0')}`}</td>
                       <td style={{ paddingLeft: '1.5rem', fontWeight: 'bold' }}>
                         {student.first_name} {student.last_name}
                       </td>
@@ -245,6 +251,34 @@ const StudentsPage = () => {
                   ))}
                 </tbody>
               </table>
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="pagination-container">
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    &#8592; Prev
+                  </button>
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button
+                      key={i}
+                      className={`pagination-btn${currentPage === i + 1 ? ' active' : ''}`}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    className="pagination-btn"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next &#8594;
+                  </button>
+                </div>
+              )}
               {sortedStudents.length === 0 && (
                 <div className="no-students">
                   <p>No students found matching your search criteria.</p>

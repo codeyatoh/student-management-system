@@ -404,7 +404,6 @@ const AddStudentForm = ({ open, onClose, onSubmit, studentToEdit }) => {
                     </thead>
                     <tbody>
                       {cls.assignments?.map(assignment => {
-                        const teacher = teacherData[assignment.teacher_id];
                         const classroom = classroomData[assignment.classroom_id];
                         const isChecked = formData.enrollments?.[cls.id] === assignment.id;
                         return (
@@ -416,7 +415,7 @@ const AddStudentForm = ({ open, onClose, onSubmit, studentToEdit }) => {
                                 onChange={() => handleEnrollmentChange(cls.id, assignment.id)}
                               />
                             </td>
-                            <td>{teacher ? `${teacher.first_name} ${teacher.last_name}` : 'N/A'}</td>
+                            <td>{assignment.teacher_name || 'N/A'}</td>
                             <td>{classroom ? `${classroom.room_number} (${classroom.building_name})` : 'N/A'}</td>
                             <td>{`${assignment.schedule.day} ${assignment.schedule.time}`}</td>
                           </tr>
