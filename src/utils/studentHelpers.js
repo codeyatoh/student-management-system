@@ -53,7 +53,6 @@ export const validateStudentForm = (formData, step = null) => {
     }
     if (!formData.address) errors.address = 'Address is required';
     if (!formData.enrollment_date) errors.enrollment_date = 'Enrollment date is required';
-    
     if (!formData.email) {
       errors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -62,29 +61,38 @@ export const validateStudentForm = (formData, step = null) => {
   }
 
   if (step === 3 || step === null) { // Validate on final step or if no step is provided
-    if (!formData.class_ids || formData.class_ids.length === 0) {
-      errors.class_ids = 'At least one class must be selected';
+    const enrollmentsArr = formData.enrollments && typeof formData.enrollments === 'object'
+      ? Object.values(formData.enrollments)
+      : [];
+    if (!enrollmentsArr || enrollmentsArr.length === 0) {
+      errors.enrollments = 'At least one class assignment must be selected';
     }
   }
-  
+
   // Full validation if no step is provided (for backward compatibility if needed)
   if (step === null) {
-      if (!formData.first_name) errors.first_name = 'First name is required';
-      if (!formData.last_name) errors.last_name = 'Last name is required';
-      if (!formData.date_of_birth) errors.date_of_birth = 'Date of birth is required';
-      if (!formData.gender) errors.gender = 'Gender is required';
-      if (!formData.contact_number) {
-        errors.contact_number = 'Contact number is required';
-      } else if (!/^\d{11}$/.test(formData.contact_number)) {
-        errors.contact_number = 'Contact number must be exactly 11 digits';
-      }
-      if (!formData.address) errors.address = 'Address is required';
-      if (!formData.enrollment_date) errors.enrollment_date = 'Enrollment date is required';
-      if (!formData.email) {
-          errors.email = 'Email is required';
-      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-          errors.email = 'Please enter a valid email address';
-      }
+    if (!formData.first_name) errors.first_name = 'First name is required';
+    if (!formData.last_name) errors.last_name = 'Last name is required';
+    if (!formData.date_of_birth) errors.date_of_birth = 'Date of birth is required';
+    if (!formData.gender) errors.gender = 'Gender is required';
+    if (!formData.contact_number) {
+      errors.contact_number = 'Contact number is required';
+    } else if (!/^\d{11}$/.test(formData.contact_number)) {
+      errors.contact_number = 'Contact number must be exactly 11 digits';
+    }
+    if (!formData.address) errors.address = 'Address is required';
+    if (!formData.enrollment_date) errors.enrollment_date = 'Enrollment date is required';
+    if (!formData.email) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    const enrollmentsArr = formData.enrollments && typeof formData.enrollments === 'object'
+      ? Object.values(formData.enrollments)
+      : [];
+    if (!enrollmentsArr || enrollmentsArr.length === 0) {
+      errors.enrollments = 'At least one class assignment must be selected';
+    }
   }
 
   return errors;

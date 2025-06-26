@@ -360,9 +360,11 @@ const LoginPage = () => {
         <div className="login-footer">
           <p>
             {isLogin ? "Don't have an account?" : "Already have an account?"}
-            <a onClick={toggleForm}>
-              {isLogin ? 'Register' : 'Sign In'}
-            </a>
+            {isLogin ? (
+              <span style={{ color: 'gray', cursor: 'not-allowed', marginLeft: 4 }}>Register (locked)</span>
+            ) : (
+              <a onClick={toggleForm}>Sign In</a>
+            )}
           </p>
         </div>
       </div>

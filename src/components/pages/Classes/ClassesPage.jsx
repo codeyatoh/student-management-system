@@ -39,7 +39,7 @@ const ClassesPage = () => {
         ...doc.data(),
         id: doc.id,
         classNumber: index + 1
-      }));
+      })).filter(cls => !cls.archived);
       setClasses(classList);
     });
     return () => unsubscribe();
@@ -81,13 +81,13 @@ const ClassesPage = () => {
     if (!selectedClass) return;
     setIsUploading(true);
     try {
-      await deleteDoc(doc(db, 'classes', selectedClass.id));
+      await updateDoc(doc(db, 'classes', selectedClass.id), { archived: true });
       // No need to call fetchClasses, real-time listener will update
       closeAllModals();
-      setAlertInfo({ show: true, message: 'Class deleted successfully!', type: 'success' });
+      setAlertInfo({ show: true, message: 'Class archived successfully!', type: 'success' });
     } catch (error) {
-      console.error("Error deleting class: ", error);
-      setAlertInfo({ show: true, message: 'Error deleting class. Please try again.', type: 'error' });
+      console.error("Error archiving class: ", error);
+      setAlertInfo({ show: true, message: 'Error archiving class. Please try again.', type: 'error' });
     } finally {
       setIsUploading(false);
     }
@@ -169,7 +169,6 @@ const ClassesPage = () => {
                     <th>ID</th>
                     <th>Class Name</th>
                     <th>Subject</th>
-                    <th>Schedule</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -179,7 +178,6 @@ const ClassesPage = () => {
                       <td>{cls.classNumber || cls.id}</td>
                       <td style={{ paddingLeft: '1.5rem', fontWeight: 'bold' }}>{cls.class_name}</td>
                       <td style={{ paddingLeft: '1.5rem' }}>{cls.subject}</td>
-                      <td style={{ paddingLeft: '1.5rem' }}>{cls.schedule}</td>
                       <td>
                         <div className="action-buttons">
                           <button 
@@ -232,7 +230,7 @@ const ClassesPage = () => {
               onConfirm={handleDelete} 
               onCancel={closeAllModals}
               title="Delete Class"
-              message={`Are you sure you want to delete "${selectedClass?.class_name}"?`}
+              message={`Are you sure you want to archive "${selectedClass?.class_name}"?`}
               subMessage="This action cannot be undone."
             />
           )}

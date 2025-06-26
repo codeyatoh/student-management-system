@@ -35,7 +35,7 @@ const StudentsPage = () => {
       ...doc.data(),
       id: doc.id,
       studentNumber: index + 1
-    }));
+    })).filter(student => !student.archived);
     setStudents(studentList);
   }, []);
 
@@ -109,14 +109,14 @@ const StudentsPage = () => {
       // For now, we will just delete the reference from Firestore.
       
       // Delete document from Firestore
-      await deleteDoc(doc(db, 'students', selectedStudent.id));
+      await updateDoc(doc(db, 'students', selectedStudent.id), { archived: true });
       
       fetchStudents(); // Re-fetch students to update the list
       closeAllModals();
-      setAlertInfo({ show: true, message: 'Student deleted successfully!', type: 'success' });
+      setAlertInfo({ show: true, message: 'Student archived successfully!', type: 'success' });
     } catch (error) {
-      console.error("Error deleting student: ", error);
-      setAlertInfo({ show: true, message: 'Error deleting student. Please try again.', type: 'error' });
+      console.error("Error archiving student: ", error);
+      setAlertInfo({ show: true, message: 'Error archiving student. Please try again.', type: 'error' });
     } finally {
       setIsUploading(false);
     }
@@ -267,8 +267,8 @@ const StudentsPage = () => {
             <DeleteConfirmationModal 
               onConfirm={handleDelete} 
               onCancel={closeAllModals}
-              title="Delete Student"
-              message={`Are you sure you want to delete "${selectedStudent?.first_name} ${selectedStudent?.last_name}"?`}
+              title="Archive Student"
+              message={`Are you sure you want to archive "${selectedStudent?.first_name} ${selectedStudent?.last_name}"?`}
               subMessage="This action cannot be undone."
             />
           )}

@@ -1,23 +1,6 @@
 /* Import existing styles from StudentsPage.css */
 @import url('../Students/StudentsPage.css');
 
-/* Classroom-specific styles */
-.classroom-container {
-  /* Inherits from students-container */
-}
-
-.classroom-header {
-  /* Inherits from students-header */
-}
-
-.classroom-table-container {
-  /* Inherits from students-table-container */
-}
-
-.classroom-table {
-  /* Inherits from students-table */
-}
-
 /* Additional classroom-specific styles if needed */
 .classroom-resources {
   max-width: 200px;

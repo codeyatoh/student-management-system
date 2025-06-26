@@ -103,7 +103,7 @@ const ViewStudentModal = ({ student, onClose }) => {
           {isLoading ? (
             <p>Loading classes...</p>
           ) : enrolledAssignments.length > 0 ? (
-            <table className="mini-table assignments-table">
+            <table className="mini-table assignments-table" style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'inherit', fontSize: '0.95rem', background: '#fff', borderRadius: '6px', overflow: 'hidden' }}>
               <thead>
                 <tr>
                   <th>Class</th>

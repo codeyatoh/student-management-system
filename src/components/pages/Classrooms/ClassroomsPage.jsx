@@ -23,14 +23,49 @@ const ClassroomsPage = () => {
   const [sortBy, setSortBy] = useState('id');
   const [sortOrder, setSortOrder] = useState('asc');
   const [viewClassroom, setViewClassroom] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [classes, setClasses] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [filteredClasses, setFilteredClasses] = useState([]);
 
   // Fetch classrooms from Firestore (real-time)
   useEffect(() => {
     const classroomsCollection = collection(db, 'classrooms');
     const q = query(classroomsCollection, orderBy('room_number'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const classroomList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const classroomList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(room => !room.archived);
       setClassrooms(classroomList);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch students (real-time)
+  useEffect(() => {
+    const studentsCollection = collection(db, 'students');
+    const unsubscribe = onSnapshot(studentsCollection, (snapshot) => {
+      const studentList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setStudents(studentList);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch classes (real-time)
+  useEffect(() => {
+    const classesCollection = collection(db, 'classes');
+    const unsubscribe = onSnapshot(classesCollection, (snapshot) => {
+      const classList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setClasses(classList);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch teachers (real-time)
+  useEffect(() => {
+    const teachersCollection = collection(db, 'teachers');
+    const unsubscribe = onSnapshot(teachersCollection, (snapshot) => {
+      const teacherList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setTeachers(teacherList);
     });
     return () => unsubscribe();
   }, []);
@@ -70,7 +105,7 @@ const ClassroomsPage = () => {
 
   const confirmDelete = async () => {
     if (classroomToDelete) {
-      await deleteDoc(doc(db, 'classrooms', classroomToDelete.id));
+      await updateDoc(doc(db, 'classrooms', classroomToDelete.id), { archived: true });
       setShowDeleteModal(false);
       setClassroomToDelete(null);
       // No need to call fetchClassrooms, real-time listener will update
@@ -96,6 +131,49 @@ const ClassroomsPage = () => {
     if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
     return 0;
   });
+
+  // When opening the view modal, filter students and classes for the selected classroom
+  const handleViewClassroom = (classroom) => {
+    setViewClassroom(classroom);
+    if (classroom) {
+      // Assigned students: enrolled in a class assignment for this classroom
+      const assignedStudents = students.filter(student => {
+        if (!Array.isArray(student.enrollments)) return false;
+        return student.enrollments.some(enrollment => {
+          const cls = classes.find(c => c.id === enrollment.classId);
+          if (!cls || !Array.isArray(cls.assignments)) return false;
+          const assignment = cls.assignments.find(a => a.id === enrollment.assignmentId);
+          return assignment && assignment.classroom_id === classroom.id;
+        });
+      });
+      setFilteredStudents(assignedStudents);
+      // Classes assigned to this classroom (by assignment)
+      const assignedClasses = classes
+        .map(cls => {
+          const assignment = Array.isArray(cls.assignments)
+            ? cls.assignments.find(a => a.classroom_id === classroom.id)
+            : null;
+          if (!assignment) return null;
+          let teacherName = 'N/A';
+          if (assignment.teacher_id) {
+            const teacher = teachers.find(t => t.id === assignment.teacher_id);
+            if (teacher) {
+              teacherName = `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim();
+            }
+          }
+          return {
+            ...cls,
+            schedule: assignment.schedule ? `${assignment.schedule.day} ${assignment.schedule.time}` : '',
+            teacher: teacherName
+          };
+        })
+        .filter(Boolean);
+      setFilteredClasses(assignedClasses);
+    } else {
+      setFilteredStudents([]);
+      setFilteredClasses([]);
+    }
+  };
 
   return (
     <div className="dashboard-layout">
@@ -175,7 +253,7 @@ const ClassroomsPage = () => {
                         <button 
                           className="action-btn view-btn" 
                           title="View Details"
-                          onClick={() => setViewClassroom(room)}
+                          onClick={() => handleViewClassroom(room)}
                         >
                           <FaEye />
                         </button>
@@ -237,8 +315,8 @@ const ClassroomsPage = () => {
         {/* View Classroom Modal */}
         <ViewClassroomModal
           classroom={viewClassroom}
-          students={[]}
-          classes={[]}
+          students={filteredStudents}
+          classes={filteredClasses}
           onClose={() => setViewClassroom(null)}
         />
       </div>

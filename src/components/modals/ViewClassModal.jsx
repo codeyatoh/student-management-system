@@ -72,7 +72,7 @@ const ViewClassModal = ({ classData, onClose }) => {
           <div className="details-section">
             <strong>Assignments:</strong>
             {isLoading ? <p>Loading...</p> : (
-              <table className="mini-table assignments-table">
+              <table className="mini-table assignments-table" style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'inherit', fontSize: '0.95rem', background: '#fff', borderRadius: '6px', overflow: 'hidden' }}>
                 <thead>
                   <tr>
                     <th>Teacher</th>
