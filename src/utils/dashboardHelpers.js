@@ -2,7 +2,7 @@ import { FaChalkboardTeacher, FaUserShield, FaSchool, FaChalkboard, FaUser } fro
 
 // Dashboard stats configuration
 export const getDashboardStats = (teacherCount, adminCount, studentCount = 0, classCount = 0) => [
-  { label: 'Teachers', value: teacherCount, color: '#55efc4', icon: 'teachers' },
+  // { label: 'Teachers', value: teacherCount, color: '#55efc4', icon: 'teachers' },
   { label: 'Admins', value: adminCount, color: '#ff7675', icon: 'admins' },
   { label: 'Students', value: studentCount, color: '#a29bfe', icon: 'students' },
   { label: 'Classes', value: classCount, color: '#74b9ff', icon: 'classes' },
