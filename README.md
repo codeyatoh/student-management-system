@@ -1,4 +1,4 @@
-# 🎓 Student Management System
+# 🎓 Student Information Management System
 
 Welcome to the **Student Information Management System**! This web application is designed to help schools and educational institutions manage students, classes, and classrooms with a fun, minimalist retro-inspired interface.
 
